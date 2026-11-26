@@ -1,0 +1,262 @@
+// ------------------------------------------------------------------
+// Tobia Theme — Dark components
+// CSS variable overrides (sidebar, cards, accent) + dialogs,
+// dropdowns and inputs on deep teal glass surfaces.
+// ------------------------------------------------------------------
+
+:root {
+    // Sidebar (deep teal glass)
+    --tb-sidebar-bg: #0F2731;
+    --tb-sidebar-border: rgba(255, 255, 255, .07);
+    --tb-sidebar-text: #C6D8D2;
+    --tb-sidebar-text-muted: rgba(198, 216, 210, .55);
+    --tb-sidebar-section: #5E7C85;
+    --tb-sidebar-item-hover: rgba(47, 191, 143, .10);
+    --tb-sidebar-item-active: #1E7F72;
+    --tb-sidebar-item-active-text: #EAFFF7;
+    --tb-sidebar-active-shadow: 0 6px 14px -6px rgba(30, 127, 114, .5);
+    --tb-sidebar-card-bg: rgba(255, 255, 255, .04);
+    --tb-sidebar-card-border: rgba(255, 255, 255, .07);
+    --tb-appsbar-text: #9DB4AE;
+    --tb-appsbar-active-bg: rgba(47, 191, 143, .16);
+    --tb-appsbar-active-text: #4FE0B0;
+
+    // "更多" dropdown in navbar
+    --tb-dropdown-bg: #0F2731;
+    --tb-dropdown-border: rgba(255, 255, 255, .10);
+
+    // Cards & surfaces
+    --tb-card-bg: #0F2731;
+    --tb-card-border: rgba(255, 255, 255, .08);
+    --tb-card-shadow: none;
+    --tb-accent: #2FBF8F;
+    --tb-accent-soft: rgba(47, 191, 143, .14);
+    --tb-chip-bg: rgba(255, 255, 255, .06);
+    --tb-chip-bg-hover: rgba(255, 255, 255, .10);
+    --tb-danger-soft: rgba(233, 106, 106, .16);
+    --tb-danger-text: #F08A8A;
+
+    // Notebook (page tabs)
+    --tb-tab-text: rgba(226, 242, 236, .62);
+    --tb-tab-text-hover: #E6F4EE;
+    --tb-tab-hover-bg: rgba(255, 255, 255, .06);
+    --tb-tab-active-bg: rgba(47, 191, 143, .18);
+    --tb-tab-active-text: #6FE3B8;
+    --tb-tab-active-ring: rgba(47, 191, 143, .35);
+
+    // Scrollbars are overridden with literal colours below (see the block
+    // after this one) so that no variable lookup can fail.
+}
+
+// == Scrollbars: this bundle is loaded after the light one, so the light thumb
+// declared in theme_base.scss is overridden here with the dark one.
+::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, .22);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, .4);
+}
+
+@supports (-moz-appearance: none) {
+    * {
+        scrollbar-color: rgba(255, 255, 255, .22) transparent;
+    }
+}
+
+// The root element needs its own scheme: core only sets `color-scheme` on
+// .o_web_client, so the document scrollbar / native widgets stayed light.
+html {
+    color-scheme: dark;
+}
+
+// == Dropdowns
+.dropdown-menu {
+    background-color: #142E38;
+    border-color: rgba(255, 255, 255, .08);
+    box-shadow: 0 16px 40px -16px rgba(0, 0, 0, .6);
+}
+
+.dropdown-item {
+    color: #C6D8D2;
+
+    &:hover,
+    &:focus {
+        background-color: rgba(255, 255, 255, .06);
+        color: #EAF2F0;
+    }
+}
+
+.dropdown-divider {
+    border-color: rgba(255, 255, 255, .08);
+}
+
+.dropdown-header {
+    color: #7E99A1;
+}
+
+// == Dialogs
+.modal-content {
+    background-color: #102832;
+    border-color: rgba(255, 255, 255, .08);
+    color: #EAF2F0;
+    box-shadow: 0 20px 60px -20px rgba(0, 0, 0, .7);
+}
+
+.modal-header,
+.modal-footer {
+    border-color: rgba(255, 255, 255, .08);
+}
+
+// == Inputs (bootstrap inputs use CSS variables; give explicit fills
+// for the Odoo-styled ones)
+.form-control,
+.form-select {
+    background-color: rgba(255, 255, 255, .04);
+    border-color: rgba(255, 255, 255, .10);
+    color: #EAF2F0;
+
+    &:focus {
+        background-color: rgba(255, 255, 255, .06);
+        color: #EAF2F0;
+    }
+}
+
+// == Search bar pill
+.o_searchview {
+    background-color: rgba(255, 255, 255, .05);
+}
+
+// == Light buttons (breadcrumb chips, status toggles...)
+// The dark bundle does not remap $light, so core compiles .btn-light with a
+// solid #FFFFFF fill: it shows up as white pills on dark chrome.
+.btn-light,
+.btn-group > .btn-light ~ .btn.dropdown-toggle-split {
+    --btn-color: #C6D8D2;
+    --btn-bg: rgba(255, 255, 255, .06);
+    --btn-border-color: rgba(255, 255, 255, .10);
+    --btn-hover-color: #EAF2F0;
+    --btn-hover-bg: rgba(255, 255, 255, .12);
+    --btn-hover-border-color: rgba(255, 255, 255, .16);
+    --btn-focus-shadow-rgb: 47, 191, 143;
+    --btn-active-color: #6FE3B8;
+    --btn-active-bg: rgba(47, 191, 143, .18);
+    --btn-active-border-color: rgba(47, 191, 143, .35);
+    --btn-disabled-color: rgba(198, 216, 210, .45);
+    --btn-disabled-bg: rgba(255, 255, 255, .03);
+}
+
+// ==================================================================
+// Deep-teal gradient chrome
+//
+// The canvas is not a flat colour: a short vertical ramp plus two glow
+// spots whose centres sit outside the viewport (negative y), so the tint
+// fades in without a visible gradient band. Sizes are in px on purpose —
+// percentage-sized radials deform when the window is resized.
+// ==================================================================
+body.o_web_client {
+    background-color: #091519;
+    background-image:
+        radial-gradient(1200px 620px at 12% -12%, rgba(47, 191, 143, .10), transparent 62%),
+        radial-gradient(900px 520px at 88% -8%, rgba(72, 120, 255, .08), transparent 58%),
+        linear-gradient(180deg, #10242C 0%, #0B1A21 42%, #091519 100%);
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+// The scrolling content pane must stay transparent, otherwise its own fill
+// hides the canvas ramp as soon as the user scrolls.
+body.o_web_client .o_action_manager > .o_action > .o_content {
+    background-color: transparent;
+    background-image: none;
+}
+
+// Sidebar: a slice of the same glass, a touch lighter at the top
+.tb_theme_sidebar {
+    background-image: linear-gradient(180deg, #14313C 0%, #0F2731 46%, #0B1B22 100%);
+}
+
+// Cards: translucent vertical ramp + 1px top highlight. The highlight is what
+// makes them read as raised glass; the gradient alone only adds depth.
+.o_control_panel,
+.o_form_view .o_form_sheet,
+.o_list_renderer .o_list_table,
+.o_kanban_renderer .o_kanban_record,
+.o-mail-ChatterContainer,
+.o-mail-Form-chatter,
+.modal-content {
+    background-image: linear-gradient(180deg, rgba(255, 255, 255, .06), rgba(255, 255, 255, .015));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06), 0 14px 30px -26px rgba(0, 0, 0, .9);
+}
+
+// Chatter: the light theme hard-codes a translucent white card, which stays
+// bright in dark mode and leaves the light message text unreadable. Keep the
+// same translucency, but with the dark card tone.
+.o-mail-ChatterContainer,
+.o-mail-Form-chatter {
+    background-color: rgba(15, 39, 49, .78);
+}
+
+// "更多" dropdown — dark teal glass with green accent
+.tb_apps_more_panel {
+    background-image: linear-gradient(180deg, rgba(20, 49, 60, .95), rgba(15, 39, 49, .98));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06),
+                0 20px 40px -18px rgba(0, 0, 0, .8);
+}
+
+.tb_apps_more_item {
+    color: #9DB4AE;
+}
+
+.tb_apps_more_item:hover {
+    background-color: rgba(47, 191, 143, .14);
+    color: #4FE0B0;
+}
+
+// == Mobile app-menu / user-menu slider
+// Core keeps `$o-burger-base-bg: $o-white` and `$o-burger-topbar-color: $o-black`
+// in the dark bundle, so the panel stayed white while its text inherited the
+// light-on-dark body colour (and the dark topbar kept black text).
+.o_app_menu_sidebar,
+.o_burger_menu {
+    .o_sidebar_topbar {
+        background-color: #14313C;
+        background-image: none;
+        color: #EAF2F0;
+        box-shadow: inset 0 -1px 0 rgba(255, 255, 255, .07);
+    }
+
+    .o_burger_menu_content,
+    .o_burger_menu_content.o_burger_menu_app {
+        background-color: #0F2731;
+        color: #C6D8D2;
+    }
+
+    .o_burger_menu_content li > a,
+    .o_burger_menu_content li > div {
+        color: #C6D8D2;
+    }
+
+    .o_burger_menu_content li:hover,
+    .o_burger_menu_content li:focus-within {
+        background-color: rgba(47, 191, 143, .10);
+    }
+}
+
+// Toggle button — same pill styling as apps bar items
+.tb_apps_more_toggle {
+    background-color: rgba(255, 255, 255, .05);
+    border: 1px solid rgba(255, 255, 255, .09);
+    color: #9DB4AE;
+}
+
+.tb_apps_more_toggle:hover {
+    background-color: rgba(47, 191, 143, .12);
+    color: #4FE0B0;
+}
+
+.tb_apps_more.open .tb_apps_more_toggle {
+    background-color: rgba(47, 191, 143, .18);
+    border-color: rgba(79, 224, 176, .35);
+    color: #4FE0B0;
+}

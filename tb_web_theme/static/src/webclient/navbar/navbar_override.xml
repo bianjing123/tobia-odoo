@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <!-- Horizontal pill-style apps bar (desktop). All pills are rendered by
+         Owl; the patched NavBar (apps_bar.js) hides overflowing pills and
+         mirrors them in the "更多" panel below, whose items are real Owl
+         elements with genuine click handlers. -->
+    <t t-name="web.NavBar" t-inherit="web.NavBar" t-inherit-mode="extension">
+        <xpath expr="//t[@t-call='web.NavBar.AppsMenu']" position="replace">
+            <t t-if="!this.ui.isSmall">
+                <nav class="tb_apps_bar" role="menu">
+                    <a class="tb_apps_bar_brand" href="/odoo" title="Tobia">
+                        <img src="/tb_theme/icon" alt="Tobia"/>
+                    </a>
+                    <t t-foreach="this.menuService.getApps()" t-as="app" t-key="app.id">
+                        <a class="tb_apps_bar_item" href="#"
+                           t-att-class="{'active': this.menuService.getCurrentApp() === app}"
+                           t-att-data-menu-xmlid="app.xmlid"
+                           t-att-data-section="app.id"
+                           t-att-title="app.name"
+                           t-on-click.prevent="() => this.menuService.selectMenu(app)">
+                            <img t-if="app.webIconData" class="tb_apps_bar_icon_img" t-att-src="app.webIconData" alt=""/>
+                            <i t-elif="app.webIcon" class="oi tb_apps_bar_icon_oi"
+                               t-att-data-icon="app.webIcon.split(',')[0]"
+                               t-att-style="'color:' + app.webIcon.split(',')[1]"/>
+                            <span class="tb_apps_bar_label" t-out="app.name"/>
+                        </a>
+                    </t>
+                </nav>
+                <div class="tb_apps_more" style="display:none">
+                    <button type="button" class="tb_apps_more_toggle">
+                        <span>更多</span>
+                        <i class="oi oi-chevron-down"/>
+                    </button>
+                    <div class="tb_apps_more_panel">
+                        <t t-foreach="this.menuService.getApps()" t-as="app" t-key="app.id">
+                            <a class="tb_apps_more_item" href="#"
+                               t-att-data-menu-xmlid="app.xmlid"
+                               t-att-title="app.name"
+                               t-on-click.prevent="() => this.menuService.selectMenu(app)">
+                                <img t-if="app.webIconData" class="tb_apps_bar_icon_img" t-att-src="app.webIconData" alt=""/>
+                                <i t-elif="app.webIcon" class="oi tb_apps_bar_icon_oi"
+                                   t-att-data-icon="app.webIcon.split(',')[0]"
+                                   t-att-style="'color:' + app.webIcon.split(',')[1]"/>
+                                <span class="tb_apps_bar_label" t-out="app.name"/>
+                            </a>
+                        </t>
+                    </div>
+                </div>
+            </t>
+            <t t-else="" t-call="web.NavBar.AppsMenu" apps="this.menuService.getApps()"/>
+        </xpath>
+    </t>
+
+</templates>

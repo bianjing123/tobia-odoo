@@ -1,0 +1,20 @@
+// ------------------------------------------------------------------
+// Tobia Theme — Main navbar variables
+// Injected right after web/primary_variables.scss (still before the
+// core navbar.variables.scss whose values are all !default).
+// ------------------------------------------------------------------
+
+$o-navbar-height: 48px;
+$o-navbar-padding-v: 8px;
+
+// Single unified surface color (same as page, sidebar and cards)
+$o-navbar-background: #FFFFFF;
+
+$o-navbar-entry-color: #3E5A4C;
+$o-navbar-entry-color--hover: #1D2E26;
+$o-navbar-entry-bg--hover: rgba(58, 163, 130, .12);
+$o-navbar-entry-color--active: #136C50;
+$o-navbar-entry-bg--active: rgba(58, 163, 130, .18);
+$o-navbar-entry-border-radius: o-to-rem(100px);
+$o-navbar-brand-color: #1D2E26;
+$o-navbar-badge-bg: #3AA382;

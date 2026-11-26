@@ -1,0 +1,40 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* tb_web_theme
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 20.0\n"
+"Report-Msgid-Bugs-To: \n"
+"Language: zh_CN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: \n"
+
+#. module: tb_web_theme
+#: model:ir.ui.view,arch_db:tb_web_theme.res_config_settings_view_form
+msgid "Tobia Theme"
+msgstr "Tobia 主题"
+
+#. module: tb_web_theme
+#: model:ir.model.fields,field_description:tb_web_theme.field_res_config_settings__tb_theme_icon
+#: model:ir.ui.view,arch_db:tb_web_theme.res_config_settings_view_form
+msgid "Small Icon"
+msgstr "小图标"
+
+#. module: tb_web_theme
+#: model:ir.ui.view,arch_db:tb_web_theme.res_config_settings_view_form
+msgid "Brand mark shown in the browser tab, the top bar and the login page. A square PNG works best."
+msgstr "显示在浏览器页签、顶部导航和登录页的品牌小图标，建议使用正方形 PNG。"
+
+#. module: tb_web_theme
+#: model:ir.model.fields,field_description:tb_web_theme.field_res_config_settings__tb_theme_login_bg
+#: model:ir.ui.view,arch_db:tb_web_theme.res_config_settings_view_form
+msgid "Login Page Background"
+msgstr "登录页背景图"
+
+#. module: tb_web_theme
+#: model:ir.ui.view,arch_db:tb_web_theme.res_config_settings_view_form
+msgid "Picture displayed behind the login card. A wide landscape image works best."
+msgstr "显示在登录卡片后面的背景图片，建议使用横向大图。"

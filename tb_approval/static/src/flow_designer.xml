@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <!-- ══════════ 设计器 ══════════ -->
+    <t t-name="tb_approval.FlowDesignerField">
+        <div class="tb-flow-designer">
+            <div class="tb-fd-toolbar">
+                <button type="button" class="btn btn-primary btn-sm"
+                        t-att-disabled="(!this.state.dirty || this.state.saving) || undefined"
+                        t-on-click="() => this.save()">
+                    <i class="fa fa-save me-1"/>保存流程
+                </button>
+                <div class="tb-fd-zoom">
+                    <button type="button" t-on-click="() => this.zoomBy(-0.1)" title="缩小">−</button>
+                    <span t-esc="Math.round(this.state.zoom * 100) + '%'"/>
+                    <button type="button" t-on-click="() => this.zoomBy(0.1)" title="放大">＋</button>
+                    <button type="button" class="reset" t-on-click="() => this.zoomReset()">重置</button>
+                </div>
+                <span class="tb-fd-tip" t-if="this.editable">点卡片设置审批人；流程末尾点「＋ 添加节点」</span>
+                <span class="tb-fd-tip text-warning" t-else="">流程尚未保存，保存后可编辑节点</span>
+            </div>
+
+            <div class="tb-fd-chain" t-on-wheel="(ev) => this.onWheel(ev)">
+                <div class="tb-fd-canvas" t-att-style="'transform: scale(' + this.state.zoom + ')'">
+                <t t-foreach="this.mainSteps" t-as="step" t-key="step.key">
+                    <!-- 普通节点 -->
+                    <t t-if="step.kind === 'node'">
+                        <div t-att-class="'tb-fd-card' + (this.state.cardMenu === step.key ? ' is-menu' : '')"
+                             t-att-data-kind="step.shape || step.nodeKind"
+                             t-on-click="() => this.select(step)">
+                            <span class="tb-fd-icon" t-att-style="'color:' + this.tone(step)" t-esc="this.icon(step)"/>
+                            <div class="tb-fd-main">
+                                <div class="tb-fd-name" t-esc="step.name"/>
+                                <div class="tb-fd-sub" t-if="step.nodeKind === 'approval'">
+                                    <t t-esc="step.approveMode === 'and' ? '会签' : '或签'"/>
+                                    <t t-if="(step.approvers || []).length"> · <t t-esc="this.names(step.approvers)"/></t>
+                                    <t t-else=""> · 未设置审批人</t>
+                                </div>
+                                <div class="tb-fd-sub" t-elif="step.nodeKind === 'cc'">
+                                    抄送
+                                    <t t-if="(step.ccUsers || []).length"> · <t t-esc="this.names(step.ccUsers)"/></t>
+                                </div>
+                            </div>
+                            <button t-if="this.editable and !step.shape" type="button" class="tb-fd-more"
+                                    t-on-click="(ev) => this.openCardMenu(ev, step)">⋯</button>
+                            <div class="tb-fd-cardmenu" t-if="this.state.cardMenu === step.key">
+                                <button type="button" t-on-click="() => this.moveStep(step, -1)">上移</button>
+                                <button type="button" t-on-click="() => this.moveStep(step, 1)">下移</button>
+                                <button type="button" class="danger" t-on-click="() => this.removeStep(step)">删除</button>
+                            </div>
+                        </div>
+                        <div class="tb-fd-link"/>
+                    </t>
+
+                    <!-- 分支块 -->
+                    <t t-else="">
+                        <div t-att-class="'tb-fd-branch mode-' + step.mode">
+                            <div class="tb-fd-branch-head">
+                                <span class="tb-fd-branch-title">
+                                    <i class="fa fa-code-fork me-1"/>
+                                    <t t-esc="step.mode === 'parallel' ? '并行分支' : '条件分支'"/>
+                                </span>
+                                <select class="tb-fd-mode" t-att-value="step.mode"
+                                        t-on-change="(ev) => this.setBranchMode(step, ev.target.value)">
+                                    <option value="exclusive">条件分支（满足其一）</option>
+                                    <option value="parallel">并行分支（全部执行）</option>
+                                </select>
+                                <button type="button" class="tb-fd-more" title="删除分支块"
+                                        t-on-click="() => this.removeStep(step)">×</button>
+                            </div>
+
+                            <div class="tb-fd-cols">
+                                <div t-foreach="step.branches" t-as="br" t-key="br.key" class="tb-fd-col">
+                                    <div class="tb-fd-col-head">
+                                        <input type="text" t-att-value="br.name"
+                                               t-on-input="(ev) => this.setBranchName(br, ev)"/>
+                                        <button type="button" class="tb-fd-more"
+                                                t-on-click="() => this.removeBranch(step, br)">×</button>
+                                    </div>
+
+                                    <button type="button" class="tb-fd-cond-btn"
+                                            t-if="step.mode === 'exclusive'"
+                                            t-on-click="() => this.openCondition(br)">
+                                        <t t-if="br.condition">
+                                            <i class="fa fa-filter me-1"/><t t-esc="br.condition"/>
+                                        </t>
+                                        <t t-else="">＋ 设置条件</t>
+                                    </button>
+
+                                    <div t-foreach="br.steps" t-as="bs" t-key="bs.key" class="tb-fd-card"
+                                         t-att-data-kind="bs.nodeKind"
+                                         t-on-click="() => this.select(bs)">
+                                        <span class="tb-fd-icon" t-att-style="'color:' + this.tone(bs)" t-esc="this.icon(bs)"/>
+                                        <div class="tb-fd-main">
+                                            <div class="tb-fd-name" t-esc="bs.name"/>
+                                            <div class="tb-fd-sub">
+                                                <t t-esc="bs.approveMode === 'and' ? '会签' : '或签'"/>
+                                                <t t-if="(bs.approvers || []).length"> · <t t-esc="this.names(bs.approvers)"/></t>
+                                            </div>
+                                        </div>
+                                        <button type="button" class="tb-fd-more"
+                                                t-on-click="(ev) => this.removeStep(bs)">×</button>
+                                    </div>
+
+                                    <button type="button" class="tb-fd-mini-add"
+                                            t-on-click="() => this.addBranchNode(br)">＋ 节点</button>
+                                </div>
+                            </div>
+
+                            <button type="button" class="tb-fd-addbranch"
+                                    t-on-click="() => this.addBranchColumn(step)">＋ 添加分支</button>
+                        </div>
+                        <div class="tb-fd-link"/>
+                    </t>
+                </t>
+
+                <!-- 末尾添加 -->
+                <div class="tb-fd-adds" t-if="this.editable">
+                    <button type="button" class="tb-fd-add" t-on-click="() => this.addStep()">＋ 添加节点</button>
+                    <button type="button" class="tb-fd-add ghost"
+                            t-on-click="() => this.addBranchBlock()">＋ 添加分支</button>
+                </div>
+
+                <!-- 结束 -->
+                <div t-if="this.endStep" class="tb-fd-card" data-kind="end"
+                     t-on-click="() => this.select(this.endStep)">
+                    <span class="tb-fd-icon" t-att-style="'color:' + this.tone(this.endStep)" t-esc="this.icon(this.endStep)"/>
+                    <div class="tb-fd-main">
+                        <div class="tb-fd-name" t-esc="this.endStep.name"/>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    </t>
+
+    <!-- ══════════ 弹窗：节点设置 ══════════ -->
+    <t t-name="tb_approval.StepDialog">
+        <Dialog title="this.step.name || '节点设置'" size="'md'">
+            <t t-set-slot="footer">
+                <button type="button" class="btn btn-primary" t-on-click="() => this.confirm()">确定</button>
+            </t>
+
+            <div class="tb-dlg">
+                <label class="tb-field">
+                    <span>节点名称</span>
+                    <input type="text" t-att-value="this.step.name"
+                           t-on-input="(ev) => this.step.name = ev.target.value"/>
+                </label>
+
+                <div class="tb-field" t-if="this.isApproval">
+                    <span>审批方式</span>
+                    <div class="tb-radio-row">
+                        <label>
+                            <input type="radio" name="tb_mode" value="or"
+                                   t-att-checked="this.step.approveMode === 'or'"
+                                   t-on-change="() => this.step.approveMode = 'or'"/>
+                            或签（一人通过即可）
+                        </label>
+                        <label>
+                            <input type="radio" name="tb_mode" value="and"
+                                   t-att-checked="this.step.approveMode === 'and'"
+                                   t-on-change="() => this.step.approveMode = 'and'"/>
+                            会签（全部通过）
+                        </label>
+                    </div>
+                </div>
+
+                <div class="tb-field" t-if="this.isApproval or this.isCc">
+                    <span><t t-esc="this.isCc ? '抄送人' : '审批人'"/></span>
+                    <div class="tb-chips">
+                        <span t-foreach="this.list" t-as="u" t-key="u.id" class="tb-chip">
+                            <t t-esc="u.name"/>
+                            <i class="fa fa-times" t-on-click="() => this.removeUser(u.id)"/>
+                        </span>
+                    </div>
+                    <input type="text" placeholder="输入姓名搜索…" autocomplete="off"
+                           t-att-value="this.state.query" t-on-input="(ev) => this.search(ev)"/>
+                    <div class="tb-user-results" t-if="this.state.results.length">
+                        <div t-foreach="this.state.results" t-as="u" t-key="u.id"
+                             class="tb-user-row" t-on-click="() => this.addUser(u)">
+                            <t t-esc="u.name"/>
+                        </div>
+                    </div>
+                </div>
+
+                <label class="tb-check" t-if="this.isApproval">
+                    <input type="checkbox" t-att-checked="this.step.autoPass"
+                           t-on-change="(ev) => this.step.autoPass = ev.target.checked"/>
+                    没有审批人时自动通过
+                </label>
+            </div>
+        </Dialog>
+    </t>
+
+    <!-- ══════════ 弹窗：分支条件 ══════════ -->
+    <t t-name="tb_approval.ConditionDialog">
+        <Dialog title="'分支条件 - ' + this.props.branch.name" size="'md'">
+            <t t-set-slot="footer">
+                <button type="button" class="btn btn-primary" t-on-click="() => this.confirm()">确定</button>
+            </t>
+
+            <div class="tb-dlg">
+                <div class="tb-cond-row">
+                    <select t-att-value="this.state.field" t-on-change="(ev) => this.setField(ev)">
+                        <option value="">选择字段…</option>
+                        <option t-foreach="this.state.fields" t-as="f" t-key="f.name"
+                                t-att-value="f.name" t-esc="f.label"/>
+                    </select>
+                    <select t-att-value="this.state.op"
+                            t-on-change="(ev) => this.state.op = ev.target.value">
+                        <option t-foreach="this.ops" t-as="op" t-key="op"
+                                t-att-value="op" t-esc="op"/>
+                    </select>
+                    <input type="text" placeholder="值" t-att-value="this.state.value"
+                           t-on-input="(ev) => this.state.value = ev.target.value"/>
+                </div>
+
+                <div class="tb-cond-preview" t-if="this.preview">
+                    生成条件：<code t-esc="this.preview"/>
+                </div>
+                <div class="tb-fd-props-hint">
+                    例：金额 大于 10000 → 满足时走本分支；都不满足走「其他」分支。
+                </div>
+            </div>
+        </Dialog>
+    </t>
+
+    <!-- ══════════ 查看器 ══════════ -->
+    <t t-name="tb_approval.FlowViewerField">
+        <div class="tb-flow-designer is-readonly">
+            <div class="tb-fd-toolbar">
+                <div class="tb-fd-zoom">
+                    <button type="button" t-on-click="() => this.zoomBy(-0.1)" title="缩小">−</button>
+                    <span t-esc="Math.round(this.state.zoom * 100) + '%'"/>
+                    <button type="button" t-on-click="() => this.zoomBy(0.1)" title="放大">＋</button>
+                    <button type="button" class="reset" t-on-click="() => this.zoomReset()">重置</button>
+                </div>
+            </div>
+            <div class="tb-fd-chain" t-on-wheel="(ev) => this.onWheel(ev)">
+                <div class="tb-fd-canvas" t-att-style="'transform: scale(' + this.state.zoom + ')'">
+                <t t-foreach="this.state.steps" t-as="step" t-key="step.key">
+                    <div t-if="step.kind === 'node'"
+                         t-att-class="'tb-fd-card' + (step.state &amp;&amp; step.state !== 'pending' ? ' st-' + step.state : '')"
+                         t-att-data-kind="step.shape || step.nodeKind">
+                        <span class="tb-fd-icon" t-att-style="'color:' + this.tone(step)" t-esc="this.icon(step)"/>
+                        <div class="tb-fd-main">
+                            <div class="tb-fd-name" t-esc="step.name"/>
+                            <div class="tb-fd-sub" t-if="step.nodeKind === 'approval'">
+                                <t t-esc="step.approveMode === 'and' ? '会签' : '或签'"/>
+                                <t t-if="(step.approvers || []).length"> · <t t-esc="this.names(step.approvers)"/></t>
+                            </div>
+                        </div>
+                    </div>
+
+                    <t t-else="">
+                        <div t-att-class="'tb-fd-branch mode-' + step.mode">
+                            <div class="tb-fd-branch-head">
+                                <span class="tb-fd-branch-title">
+                                    <i class="fa fa-code-fork me-1"/>
+                                    <t t-esc="step.mode === 'parallel' ? '并行分支' : '条件分支'"/>
+                                </span>
+                            </div>
+                            <div class="tb-fd-cols">
+                                <div t-foreach="step.branches" t-as="br" t-key="br.key" class="tb-fd-col">
+                                    <div class="tb-fd-col-head">
+                                        <span class="tb-fd-col-name" t-esc="br.name"/>
+                                    </div>
+                                    <div class="tb-fd-col-cond" t-if="step.mode === 'exclusive' &amp;&amp; br.condition">
+                                        <code t-esc="br.condition"/>
+                                    </div>
+                                    <div t-foreach="br.steps" t-as="bs" t-key="bs.key"
+                                         t-att-class="'tb-fd-card' + (bs.state &amp;&amp; bs.state !== 'pending' ? ' st-' + bs.state : '')"
+                                         t-att-data-kind="bs.nodeKind">
+                                        <span class="tb-fd-icon" t-att-style="'color:' + this.tone(bs)" t-esc="this.icon(bs)"/>
+                                        <div class="tb-fd-main">
+                                            <div class="tb-fd-name" t-esc="bs.name"/>
+                                            <div class="tb-fd-sub">
+                                                <t t-esc="bs.approveMode === 'and' ? '会签' : '或签'"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </t>
+                </div>
+            </div>
+        </div>
+    </t>
+
+</templates>

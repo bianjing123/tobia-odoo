@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="tb_web_theme.ThemeSidebar">
+        <aside class="tb_theme_sidebar" t-att-class="{'tb_sidebar_collapsed': !this.state.open}">
+            <div class="tb_sidebar_head">
+                <t t-if="this.state.open">
+                    <span class="tb_sidebar_title">导航</span>
+                </t>
+                <button class="tb_sidebar_toggle" t-on-click="() => this.toggleSidebar()"
+                        t-att-title="this.state.open ? '折叠侧边栏' : '展开侧边栏'"
+                        t-att-aria-label="this.state.open ? '折叠侧边栏' : '展开侧边栏'">
+                    <svg t-if="this.state.open" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <rect x="1.5" y="2.5" width="13" height="11" rx="2.5" stroke="currentColor" stroke-width="1.4"/>
+                        <path d="M6 2.5V13.5" stroke="currentColor" stroke-width="1.4"/>
+                    </svg>
+                    <svg t-else="" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <rect x="1.5" y="2.5" width="13" height="11" rx="2.5" stroke="currentColor" stroke-width="1.4"/>
+                        <path d="M6 2.5V13.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Collapsed rail: one icon per section -->
+            <nav t-if="!this.state.open" class="tb_sidebar_nav tb_sidebar_nav_compact">
+                <t t-foreach="this.sections" t-as="section" t-key="section.id">
+                    <a class="tb_sidebar_disc" href="#"
+                       t-att-title="section.name"
+                       t-att-aria-label="section.name"
+                       t-att-style="'--tb-disc-color:' + this.letterColor(section)"
+                       t-on-click.prevent="() => this.expandSidebar()">
+                        <span t-out="this.letter(section)"/>
+                    </a>
+                </t>
+            </nav>
+
+            <!-- Expanded: grouped cards -->
+            <nav t-else="" class="tb_sidebar_nav">
+                <t t-foreach="this.sections" t-as="section" t-key="section.id">
+                    <div class="tb_sidebar_group">
+                        <div class="tb_sidebar_group_title" t-out="section.name"/>
+                        <t t-foreach="this.rowsFor(section)" t-as="row" t-key="row.node.id">
+                            <!-- container menu (no action): a sub-heading, not a link -->
+                            <div t-if="row.kind === 'group'"
+                                 class="tb_sidebar_subgroup"
+                                 t-att-style="'--tb-depth:' + row.depth"
+                                 t-out="row.node.name"/>
+                            <a t-else="" class="tb_sidebar_item" href="#"
+                               t-att-class="{'active': this.state.activeMenuId === row.node.id}"
+                               t-att-style="'--tb-depth:' + row.depth"
+                               t-on-click.prevent="() => this.onMenuClick(row.node)">
+                                <span class="tb_sidebar_item_icon" t-out="this.iconFor(row.node)"/>
+                                <span class="tb_sidebar_label" t-out="row.node.name"/>
+                            </a>
+                        </t>
+                    </div>
+                </t>
+            </nav>
+        </aside>
+    </t>
+
+</templates>

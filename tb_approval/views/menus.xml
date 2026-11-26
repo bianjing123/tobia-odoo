@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_tb_approval_root"
+              name="审批中心"
+              groups="tb_approval.group_approval_user"
+              sequence="60"/>
+
+    <menuitem id="menu_approval_task_todo"
+              name="待办"
+              parent="menu_tb_approval_root"
+              action="action_approval_center_todo"
+              groups="tb_approval.group_approval_user"
+              sequence="10"/>
+
+    <menuitem id="menu_approval_task_done"
+              name="已办"
+              parent="menu_tb_approval_root"
+              action="action_approval_center_done"
+              groups="tb_approval.group_approval_user"
+              sequence="20"/>
+
+    <menuitem id="menu_approval_instance_mine"
+              name="我发起"
+              parent="menu_tb_approval_root"
+              action="action_approval_center_mine"
+              groups="tb_approval.group_approval_user"
+              sequence="30"/>
+
+    <menuitem id="menu_approval_cc_mine"
+              name="抄送我"
+              parent="menu_tb_approval_root"
+              action="action_approval_cc_mine"
+              groups="tb_approval.group_approval_user"
+              sequence="40"/>
+
+    <menuitem id="menu_approval_instance_all"
+              name="全部审批"
+              parent="menu_tb_approval_root"
+              action="action_approval_center_all"
+              groups="tb_approval.group_approval_user"
+              sequence="50"/>
+
+    <menuitem id="menu_approval_flow"
+              name="流程定义"
+              parent="menu_tb_approval_root"
+              action="action_approval_flow"
+              groups="tb_approval.group_approval_user"
+              sequence="60"/>
+</odoo>

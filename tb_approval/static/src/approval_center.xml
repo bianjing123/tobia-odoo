@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="tb_approval.ApprovalCenter">
+        <div class="tb-approval-center">
+            <div class="tb-ac-workspace">
+                <aside class="tb-ac-list">
+                    <div class="tb-ac-list-heading">
+                        <strong t-esc="this.title"/>
+                        <div class="tb-ac-list-tools">
+                            <span t-esc="this.state.rows.length + (this.state.hasMore ? '+' : '')"/>
+                            <button type="button" class="tb-ac-refresh" title="刷新列表" aria-label="刷新列表"
+                                    t-on-click="() => this.load(true)">
+                                <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor"
+                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M20 11a8 8 0 1 0-2.3 6.7"/>
+                                    <path d="M20 4v7h-7"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="tb-ac-list-scroll">
+                        <button t-foreach="this.state.rows" t-as="row" t-key="row.id" type="button"
+                                t-att-class="'tb-ac-row' + (this.state.selectedId === row.id ? ' is-selected' : '')"
+                                t-on-click="() => this.select(row)">
+                            <span class="tb-ac-row-top">
+                                <strong t-esc="row.document_name"/>
+                                <em t-att-class="'tb-ac-state is-' + (row.task_state || row.state)"
+                                    t-esc="this.statusLabel(row.task_state || row.state)"/>
+                            </span>
+                            <span class="tb-ac-row-flow"><t t-esc="row.document_model"/> · <t t-esc="row.flow_name"/> · <t t-esc="row.flow_version"/></span>
+                            <span class="tb-ac-row-meta">
+                                <t t-if="row.node_name"><span t-esc="row.node_name"/> · </t>
+                                <span t-esc="row.name"/>
+                            </span>
+                            <span class="tb-ac-row-date" t-esc="row.created_at"/>
+                        </button>
+                        <div t-if="this.state.loading &amp;&amp; !this.state.rows.length" class="tb-ac-list-empty">
+                            正在加载审批记录…
+                        </div>
+                        <div t-elif="!this.state.rows.length" class="tb-ac-list-empty">
+                            当前没有审批记录
+                        </div>
+                        <button t-if="this.state.hasMore" type="button" class="tb-ac-more"
+                                t-att-disabled="this.state.loading || undefined"
+                                t-on-click="() => this.load(false)">加载更多</button>
+                    </div>
+                </aside>
+                <main class="tb-ac-detail">
+                    <div t-if="this.state.detailLoading" class="tb-ac-placeholder">正在加载审批详情…</div>
+                    <div t-elif="!this.state.detail" class="tb-ac-placeholder">选择左侧记录查看单据与审批进度</div>
+                    <t t-else="">
+                        <div class="tb-ac-detail-head">
+                            <div class="tb-ac-detail-identity">
+                                <h2 t-esc="this.state.detail.document.name"/>
+                                <em t-att-class="'tb-ac-state is-' + this.state.detail.state"
+                                    t-esc="this.statusLabel(this.state.detail.state)"/>
+                                <span class="tb-ac-eyebrow"><t t-esc="this.state.detail.name"/> · <t t-esc="this.state.detail.flow_version"/></span>
+                            </div>
+                            <div class="tb-ac-detail-actions">
+                                <button t-if="this.state.detail.document.available" type="button"
+                                        class="tb-ac-primary" t-on-click="() => this.openDocument()">
+                                    <i class="fa fa-external-link"/> 全屏打开单据
+                                </button>
+                                <button type="button" t-on-click="() => this.openInstance()">审批记录</button>
+                            </div>
+                        </div>
+                        <div class="tb-ac-document">
+                            <div class="tb-ac-document-title">
+                                <strong>单据详情</strong>
+                                <span t-esc="this.state.detail.document.model_label || this.state.detail.document.model"/>
+                            </div>
+                            <div t-if="this.state.detail.document.available" class="tb-ac-document-view">
+                                <View t-key="this.state.detail.document.model + ':' + this.state.detail.document.res_id"
+                                      t-props="this.documentViewProps"/>
+                            </div>
+                            <t t-elif="this.state.detail.document.summary_available">
+                                <div class="tb-ac-document-fields">
+                                    <div t-foreach="this.state.detail.document.fields" t-as="field" t-key="field.label">
+                                        <span t-esc="field.label"/>
+                                        <strong t-esc="field.value"/>
+                                    </div>
+                                </div>
+                                <div t-if="this.state.detail.document.lines.length" class="tb-ac-lines">
+                                    <strong>采购明细</strong>
+                                    <div class="tb-ac-lines-scroll">
+                                        <table>
+                                            <thead><tr><th>产品</th><th>数量</th><th>单位</th><th>单价</th><th>小计</th></tr></thead>
+                                            <tbody>
+                                                <tr t-foreach="this.state.detail.document.lines" t-as="line" t-key="line_index">
+                                                    <td t-esc="line.product"/>
+                                                    <td t-esc="line.quantity"/>
+                                                    <td t-esc="line.unit"/>
+                                                    <td t-esc="line.price.toFixed(2)"/>
+                                                    <td t-esc="line.subtotal.toFixed(2)"/>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <span t-if="this.state.detail.document.line_count &gt; this.state.detail.document.lines.length"
+                                          class="tb-ac-summary-hint">仅展示前 100 行，请打开单据查看全部明细。</span>
+                                </div>
+                                <p class="tb-ac-summary-hint">仅显示审批所需摘要；打开原单据需要相应的读取权限。</p>
+                            </t>
+                            <p t-else="" class="tb-ac-unavailable">没有该单据的读取权限，或单据已被删除。</p>
+                        </div>
+                        <div class="tb-ac-progress-head">
+                            <h3>当前审批进度</h3>
+                            <div class="tb-ac-legend">
+                                <span><i class="is-pending"/>待审批</span>
+                                <span><i class="is-running"/>审批中</span>
+                                <span><i class="is-approved"/>已完成</span>
+                                <span><i class="is-rejected"/>已驳回</span>
+                            </div>
+                        </div>
+                        <div class="tb-ac-diagram">
+                            <svg t-if="this.layout.nodes.length" class="tb-ac-svg"
+                                 t-att-viewBox="this.layout.viewBox"
+                                 t-att-style="'max-width:' + this.layout.width + 'px;max-height:' + this.layout.height + 'px'"
+                                 preserveAspectRatio="xMidYMid meet" role="img" aria-label="审批流程进度图">
+                                <defs>
+                                    <marker id="tb-ac-arrow-pending" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0 L9 4.5 L0 9 Z" fill="#9aa6b2"/></marker>
+                                    <marker id="tb-ac-arrow-running" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0 L9 4.5 L0 9 Z" fill="#2879b8"/></marker>
+                                    <marker id="tb-ac-arrow-approved" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0 L9 4.5 L0 9 Z" fill="#2c9a70"/></marker>
+                                    <marker id="tb-ac-arrow-rejected" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0 L9 4.5 L0 9 Z" fill="#c75b55"/></marker>
+                                </defs>
+                                <g t-foreach="this.layout.edges" t-as="edge" t-key="edge.id"
+                                   t-att-class="'tb-ac-edge is-' + edge.state">
+                                    <polyline t-att-points="edge.points" fill="none" stroke-width="2"
+                                              t-att-marker-end="'url(#tb-ac-arrow-' + edge.state + ')'"/>
+                                    <text t-if="edge.name" t-att-x="edge.labelX" t-att-y="edge.labelY"
+                                          text-anchor="middle" class="tb-ac-edge-label" t-esc="edge.name"/>
+                                </g>
+                                <g t-foreach="this.layout.nodes" t-as="node" t-key="node.id"
+                                   t-att-class="'tb-ac-node is-' + node.state">
+                                    <t t-if="node.node_type === 'start'">
+                                        <circle t-att-cx="node.x" t-att-cy="node.y" r="24" class="tb-ac-shape"/>
+                                        <text t-att-x="node.x" t-att-y="node.y + 5" text-anchor="middle" class="tb-ac-node-name" t-esc="node.name"/>
+                                    </t>
+                                    <t t-elif="node.node_type === 'end'">
+                                        <circle t-att-cx="node.x" t-att-cy="node.y" r="27" class="tb-ac-shape"/>
+                                        <circle t-att-cx="node.x" t-att-cy="node.y" r="22" class="tb-ac-inner"/>
+                                        <text t-att-x="node.x" t-att-y="node.y + 5" text-anchor="middle" class="tb-ac-node-name" t-esc="node.name"/>
+                                    </t>
+                                    <t t-elif="['exclusive','exclusive_join','parallel_split','parallel_join'].includes(node.node_type)">
+                                        <polygon t-att-points="node.x + ',' + (node.y - 34) + ' ' + (node.x + 34) + ',' + node.y + ' ' + node.x + ',' + (node.y + 34) + ' ' + (node.x - 34) + ',' + node.y" class="tb-ac-shape"/>
+                                        <text t-att-x="node.x" t-att-y="node.y + 5" text-anchor="middle" class="tb-ac-node-name" t-esc="node.name"/>
+                                    </t>
+                                    <t t-else="">
+                                        <rect t-att-x="node.x - 95" t-att-y="node.y - 35" width="190" height="70" rx="5" class="tb-ac-shape"/>
+                                        <rect t-att-x="node.x - 94" t-att-y="node.y - 34" width="188" height="22" rx="4" class="tb-ac-card-head"/>
+                                        <text t-att-x="node.x - 84" t-att-y="node.y - 18" class="tb-ac-card-type" t-esc="node.typeLabel"/>
+                                        <text t-att-x="node.x - 84" t-att-y="node.y + 8" class="tb-ac-card-name" t-esc="node.name"/>
+                                        <text t-if="node.desc" t-att-x="node.x - 84" t-att-y="node.y + 25"
+                                              class="tb-ac-card-desc" t-esc="node.desc.slice(0, 18)"/>
+                                    </t>
+                                </g>
+                            </svg>
+                            <div t-else="" class="tb-ac-diagram-empty">此审批尚无流程图</div>
+                        </div>
+                        <div class="tb-ac-tasks">
+                            <h3>审批节点记录</h3>
+                            <div t-foreach="this.state.detail.tasks" t-as="task" t-key="task.id" class="tb-ac-task">
+                                <div><strong t-esc="task.node"/><span t-esc="task.user"/></div>
+                                <em t-att-class="'tb-ac-state is-' + task.state" t-esc="this.statusLabel(task.state)"/>
+                                <p t-if="task.comment" t-esc="task.comment"/>
+                            </div>
+                        </div>
+                        <div t-if="this.state.tab === 'todo' &amp;&amp; this.state.selectedTaskId" class="tb-ac-decision">
+                            <label for="tb-ac-comment">审批意见</label>
+                            <textarea id="tb-ac-comment" rows="3" placeholder="填写审批意见（可选）"
+                                      t-att-value="this.state.comment"
+                                      t-on-input="(ev) => this.state.comment = ev.target.value"/>
+                            <div>
+                                <button type="button" class="tb-ac-primary"
+                                        t-att-disabled="this.state.busy || undefined"
+                                        t-on-click="() => this.decide('action_approve')">通过</button>
+                                <button type="button" class="tb-ac-reject"
+                                        t-att-disabled="this.state.busy || undefined"
+                                        t-on-click="() => this.decide('action_reject')">驳回</button>
+                            </div>
+                        </div>
+                    </t>
+                </main>
+            </div>
+        </div>
+    </t>
+</templates>

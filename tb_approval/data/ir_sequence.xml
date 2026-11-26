@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="seq_approval_instance" model="ir.sequence">
+        <field name="name">审批单编号</field>
+        <field name="code">approval.instance</field>
+        <field name="prefix">SP</field>
+        <field name="padding">6</field>
+    </record>
+</odoo>

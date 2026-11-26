@@ -1,0 +1,51 @@
+// ------------------------------------------------------------------
+// Tobia Theme — Dark views (glass cards on deep teal)
+// ------------------------------------------------------------------
+
+// == Forms
+.o_form_view .o_form_sheet_bg {
+    background-color: transparent;
+}
+
+.o_form_view .o_form_sheet {
+    background-color: var(--tb-card-bg);
+    border-color: rgba(255, 255, 255, .08);
+    box-shadow: none;
+}
+
+// == Lists
+.o_list_renderer .o_list_table {
+    background-color: var(--tb-card-bg);
+    border-color: rgba(255, 255, 255, .08);
+    box-shadow: none;
+
+    thead th {
+        background-color: #102831;
+        color: #9FB8AE;
+        border-bottom: 1px solid rgba(255, 255, 255, .08);
+    }
+
+    tbody tr td,
+    tbody tr th {
+        border-bottom: 1px solid rgba(255, 255, 255, .05);
+    }
+
+    tbody tr.o_selected_row td,
+    tbody tr.o_selected_row th {
+        background-color: rgba(47, 191, 143, .14);
+    }
+}
+
+// == Kanban
+.o_kanban_renderer .o_kanban_record {
+    background-color: var(--tb-card-bg);
+    border-color: rgba(255, 255, 255, .08);
+    box-shadow: none;
+}
+
+// == Control panel
+// keep the themed surface: this used to be repainted with the page background,
+// which cancelled the card colour set in theme_views.scss
+.o_control_panel {
+    background-color: var(--tb-card-bg);
+}

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- Browser tab icon. Core renders
+         <link rel="shortcut icon" t-att-href="x_icon or '/web/static/img/favicon.ico'"/>
+         which resolves to the odoo logo. When a small icon has been uploaded
+         in General Settings it takes over, otherwise the module icon is kept. -->
+    <template id="layout_favicon" inherit_id="web.layout" name="Tobia: favicon">
+        <xpath expr="//link[@rel='shortcut icon']" position="replace">
+            <link t-if="env['ir.config_parameter'].sudo().get_int('tb_web_theme.icon_attachment_id', 0)"
+                  rel="shortcut icon" href="/tb_theme/icon"/>
+            <link t-else="" type="image/x-icon" rel="shortcut icon"
+                  href="/tb_web_theme/static/src/img/favicon.ico"/>
+        </xpath>
+    </template>
+
+    <!-- Login page: branding + optional uploaded background picture. -->
+    <template id="login_logo" inherit_id="web.login_layout" name="Tobia: login branding">
+        <xpath expr="//t[@t-call='web.frontend_layout']" position="before">
+            <t t-set="tb_login_bg" t-value="env['ir.config_parameter'].sudo().get_int('tb_web_theme.login_bg_attachment_id', 0)"/>
+        </xpath>
+        <xpath expr="//t[@t-call='web.frontend_layout']" position="attributes">
+            <attribute name="body_classname.f">bg-100 tb_login_page</attribute>
+        </xpath>
+        <xpath expr="//t[@t-call='web.frontend_layout']/div[hasclass('container')]" position="before">
+            <style t-if="tb_login_bg">
+                /* Background is injected here (only when a custom image exists).
+                   All responsive layout rules live in theme_login.scss. */
+                body.tb_login_page {
+                    background-image: url('/tb_theme/login-bg');
+                    background-size: cover;
+                    background-position: center;
+                    background-repeat: no-repeat;
+                }
+            </style>
+            <style>
+                /* 登录卡片玻璃透明化（桌面） */
+                body.tb_login_page .container .row > div,
+                body.tb_login_page #login,
+                body.tb_login_page .o_login,
+                body.tb_login_page .card {
+                    background-color: rgba(255, 255, 255, .68) !important;
+                    backdrop-filter: blur(14px) saturate(140%);
+                    -webkit-backdrop-filter: blur(14px) saturate(140%);
+                    border: 1px solid rgba(255, 255, 255, .45);
+                    border-radius: 16px;
+                    box-shadow: 0 8px 32px rgba(16, 24, 40, .08);
+                }
+
+                /* 输入框也稍作透明 */
+                body.tb_login_page .o_login_form .form-control {
+                    background-color: rgba(255, 255, 255, .55);
+                    border-color: rgba(255, 255, 255, .3);
+                }
+
+                /* 登录按钮 */
+                body.tb_login_page .o_login_form .btn-primary {
+                    background-color: rgba(20, 169, 127, .78);
+                    border-color: rgba(20, 169, 127, .78);
+                    backdrop-filter: blur(6px);
+                    -webkit-backdrop-filter: blur(6px);
+                }
+                body.tb_login_page .o_login_form .btn-primary:hover {
+                    background-color: rgba(20, 169, 127, .92);
+                    border-color: rgba(20, 169, 127, .92);
+                }
+
+                /* 隐藏底部：注册、超级用户、使用密码、管理数据库 */
+                body.tb_login_page .oe_login_buttons a.btn-link,
+                body.tb_login_page .oe_login_buttons button.btn-link,
+                body.tb_login_page .o_login_auth,
+                body.tb_login_page .text-center.small.mt-4.pt-3.border-top {
+                    display: none !important;
+                }
+            </style>
+        </xpath>
+        <!-- Login card logo. Core shows /web/binary/company_logo but only while the
+             company keeps the default logo, so the block is replaced as a whole. -->
+        <xpath expr="//img[contains(@t-attf-src, 'company_logo')]/.." position="replace">
+            <div class="text-center pb-3 border-bottom mb-4">
+                <img src="/tb_theme/icon" alt="Tobia"
+                     style="max-height: 72px; width: auto; max-width: 100%;"/>
+            </div>
+        </xpath>
+    </template>
+
+</odoo>

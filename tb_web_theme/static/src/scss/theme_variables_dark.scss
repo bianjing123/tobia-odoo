@@ -1,0 +1,60 @@
+// ------------------------------------------------------------------
+// Tobia Theme — Dark tokens (deep teal glass)
+// Injected AFTER theme_variables.scss inside web.assets_web_dark.
+// Plain assignments (NOT !default): they override the light tokens
+// declared just before, and are still processed BEFORE
+// secondary_variables.scss and bootstrap_overridden.scss, so every
+// derived variable and generated CSS variable uses these values.
+// ------------------------------------------------------------------
+
+// Brand
+$o-brand-odoo: #2FBF8F;
+$o-brand-primary: #2FBF8F;
+
+// Semantic actions (brightened for dark surfaces)
+$o-success: #35B77E;
+$o-info: #4AA8D8;
+$o-warning: #E8A33D;
+$o-danger: #E85B51;
+
+$o-theme-text-colors: (
+    "success": #5BC98F,
+    "info": #6FB9DE,
+    "warning": #F0B55C,
+    "danger": #F07971,
+);
+
+// Grays — inverted, teal-tinted
+$o-gray-100: #102831;
+$o-gray-200: #16313C;
+$o-gray-300: #1E3E4B;
+$o-gray-400: #2C505E;
+$o-gray-500: #54747F;
+$o-gray-600: #7E99A1;
+$o-gray-700: #A6BCC2;
+$o-gray-800: #D3E1E1;
+$o-gray-900: #EAF2F0;
+
+// Surfaces
+$o-view-background-color: #122933;
+$o-webclient-background-color: #0B1A21;
+
+// Borders
+$o-border-color: #1E3E4B;
+$o-form-lightsecondary: #2C505E;
+$o-shadow-color: #000000;
+
+// Components
+$o-component-active-bg: #1E6B5D;
+$o-component-active-border: #2FBF8F;
+
+// Text
+$o-main-headings-color: #F2F8F4;
+$o-main-link-color: lighten($o-brand-primary, 8%);
+// (literal alpha: $o-opacity-muted is declared later in the bundle)
+$o-main-color-muted: rgba(156, 181, 174, .76);
+$o-main-code-color: #E37BA8;
+
+// Forms & lists
+$o-list-group-active-bg: #173641;
+$o-main-favorite-color: #FFD34D;

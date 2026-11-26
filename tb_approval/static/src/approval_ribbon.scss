@@ -1,0 +1,10 @@
+.o_form_sheet:has(> .o_widget_web_ribbon:not(.tb_approval_status_ribbon))
+    > .tb_approval_status_ribbon .ribbon {
+    right: 10.25rem;
+}
+
+.tb_approval_ribbon_anchor {
+    position: relative;
+    height: 0;
+    z-index: 1;
+}

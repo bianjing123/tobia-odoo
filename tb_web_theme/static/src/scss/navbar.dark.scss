@@ -1,0 +1,45 @@
+// ------------------------------------------------------------------
+// Tobia Theme — Dark navbar (deep teal glass)
+// Loaded only inside web.assets_web_dark (overrides light rules).
+// ------------------------------------------------------------------
+
+.o_main_navbar {
+    // translucent so the page glow shows through, with a soft blur on top of it
+    background: linear-gradient(100deg, rgba(22, 48, 59, .82) 0%, rgba(16, 42, 51, .86) 55%, rgba(18, 48, 54, .82) 100%);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+
+    // Entry tokens consumed by core navbar.scss
+    // (core reads --NavBar-entry-backgroundColor*, not --NavBar-entry-bg*)
+    --NavBar-entry-color: #9FB8AE;
+    --NavBar-entry-color--hover: #EAF2F0;
+    --NavBar-entry-color--active: #6FE0B8;
+    --NavBar-entry-backgroundColor: transparent;
+    --NavBar-entry-backgroundColor--hover: rgba(255, 255, 255, .07);
+    --NavBar-entry-backgroundColor--focus: rgba(255, 255, 255, .07);
+    --NavBar-entry-backgroundColor--active: rgba(47, 191, 143, .16);
+    --NavBar-entry-borderRadius: #{o-to-rem(100px)};
+
+    .o_menu_brand {
+        color: #EAF2F0;
+    }
+
+    .o_navbar_breadcrumbs {
+        color: #9FB8AE;
+
+        li a {
+            color: #C6D8D2;
+        }
+    }
+}
+
+// Systray toggle button keeps the navbar entry look on dark
+.tb_theme_scheme_toggle {
+    color: #9FB8AE;
+
+    &:hover,
+    &:focus {
+        color: #EAF2F0;
+        background-color: rgba(255, 255, 255, .07);
+    }
+}

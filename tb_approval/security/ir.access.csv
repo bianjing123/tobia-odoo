@@ -1,0 +1,9 @@
+id,name,model_id,group_id/id,operation,domain
+access_approval_flow_internal,approval.flow.internal,approval.flow,base.group_user,cru,""
+access_approval_node_internal,approval.node.internal,approval.node,base.group_user,cru,""
+access_approval_transition_internal,approval.transition.internal,approval.transition,base.group_user,cru,""
+access_approval_instance_internal,approval.instance.internal,approval.instance,base.group_user,cru,""
+access_approval_task_internal,approval.task.internal,approval.task,base.group_user,cru,""
+access_approval_cc_internal,approval.cc.internal,approval.cc,base.group_user,cru,""
+access_approval_token_internal,approval.token.internal,approval.token,base.group_user,cru,""
+access_approval_add_signer_internal,approval.add.signer.internal,approval.add.signer,base.group_user,cru,""

@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============ 审批实例 ============ -->
+    <record id="view_approval_instance_list" model="ir.ui.view">
+        <field name="name">approval.instance.list</field>
+        <field name="model">approval.instance</field>
+        <field name="arch" type="xml">
+            <list decoration-info="state == 'running'">
+                <field name="name"/>
+                <field name="flow_id"/>
+                <field name="flow_version"/>
+                <field name="record_name"/>
+                <field name="initiator_id"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'approved'"
+                       decoration-danger="state == 'rejected'"
+                       decoration-info="state == 'running'"/>
+                <field name="create_date" string="发起时间"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_approval_instance_form" model="ir.ui.view">
+        <field name="name">approval.instance.form</field>
+        <field name="model">approval.instance</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_cancel" type="object" string="取消审批"
+                            class="btn-secondary"
+                            invisible="state != 'running' or parent_instance_id"/>
+                    <button name="action_open_add_signer" type="object" string="加签"
+                            class="btn-primary"
+                            invisible="state != 'running'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="running,approved"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_record" type="object" class="oe_stat_button" icon="fa-file-o">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">查看单据</span>
+                            </div>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h2><field name="name" readonly="1"/> <field name="record_name" readonly="1"/></h2>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="flow_id" readonly="1"/>
+                            <field name="flow_version" readonly="1"/>
+                            <field name="initiator_id" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="res_model" readonly="1" invisible="1"/>
+                            <field name="res_id" readonly="1" invisible="1"/>
+                            <field name="create_date" readonly="1" string="发起时间"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="流程图">
+                            <div class="tb-flow-page">
+                                <field name="diagram_data" widget="flow_preview" readonly="1" nolabel="1"/>
+                            </div>
+                        </page>
+                        <page string="审批任务">
+                            <field name="task_ids" readonly="1">
+                                <list>
+                                    <field name="node_id"/>
+                                    <field name="user_id"/>
+                                    <field name="state" widget="badge"
+                                           decoration-success="state == 'approved'"
+                                           decoration-danger="state == 'rejected'"
+                                           decoration-info="state == 'pending'"/>
+                                    <field name="comment"/>
+                                    <field name="date_done"/>
+                                    <button name="action_approve" type="object" string="通过"
+                                            class="btn-primary"
+                                            invisible="state != 'pending'"/>
+                                    <button name="action_reject" type="object" string="驳回"
+                                            class="btn-danger"
+                                            invisible="state != 'pending'"/>
+                                    <button name="action_cancel_task" type="object" string="减签"
+                                            invisible="state != 'pending'"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="抄送">
+                            <field name="cc_ids" readonly="1">
+                                <list>
+                                    <field name="node_id"/>
+                                    <field name="user_id"/>
+                                    <field name="read_at"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="动态">
+                            <chatter/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ============ 审批任务（我的待办/已办） ============ -->
+    <record id="view_approval_task_list" model="ir.ui.view">
+        <field name="name">approval.task.list</field>
+        <field name="model">approval.task</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="instance_id"/>
+                <field name="node_id"/>
+                <field name="user_id"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'approved'"
+                       decoration-danger="state == 'rejected'"
+                       decoration-info="state == 'pending'"/>
+                <field name="comment" optional="show"/>
+                <field name="date_done" optional="show"/>
+                <button name="action_approve" type="object" string="通过" icon="fa-check"
+                        class="btn-primary"
+                        invisible="state != 'pending'"/>
+                <button name="action_reject" type="object" string="驳回" icon="fa-times"
+                        class="btn-danger"
+                        invisible="state != 'pending'"/>
+                <button name="action_cancel_task" type="object" string="减签" icon="fa-minus"
+                        invisible="state != 'pending'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ============ 抄送 ============ -->
+    <record id="view_approval_cc_list" model="ir.ui.view">
+        <field name="name">approval.cc.list</field>
+        <field name="model">approval.cc</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="instance_id"/>
+                <field name="node_id"/>
+                <field name="user_id"/>
+                <field name="read_at"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ============ 加签向导 ============ -->
+    <record id="view_approval_add_signer_form" model="ir.ui.view">
+        <field name="name">approval.add.signer.form</field>
+        <field name="model">approval.add.signer</field>
+        <field name="arch" type="xml">
+            <form string="加签">
+                <group>
+                    <field name="instance_id" readonly="1"/>
+                    <field name="node_id"
+                           domain="[('flow_id', '=', instance_id)]"/>
+                    <field name="user_ids" widget="many2many_tags"/>
+                </group>
+                <footer>
+                    <button name="action_add" type="object" string="确认加签" class="btn-primary"/>
+                    <button string="取消" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- ============ 动作 ============ -->
+    <record id="action_approval_instance_all" model="ir.actions.act_window">
+        <field name="name">全部审批</field>
+        <field name="res_model">approval.instance</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_approval_instance_mine" model="ir.actions.act_window">
+        <field name="name">我发起</field>
+        <field name="res_model">approval.instance</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('initiator_id', '=', uid)]</field>
+    </record>
+
+    <record id="action_approval_task_todo" model="ir.actions.act_window">
+        <field name="name">待办</field>
+        <field name="res_model">approval.task</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('user_id', '=', uid), ('state', '=', 'pending')]</field>
+    </record>
+
+    <record id="action_approval_task_done" model="ir.actions.act_window">
+        <field name="name">已办</field>
+        <field name="res_model">approval.task</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('user_id', '=', uid), ('state', 'in', ['approved', 'rejected'])]</field>
+    </record>
+
+    <record id="action_approval_cc_mine" model="ir.actions.act_window">
+        <field name="name">抄送我</field>
+        <field name="res_model">approval.cc</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('user_id', '=', uid)]</field>
+    </record>
+
+    <!-- Owl 审批中心：保留上方原生列表动作作为兼容入口。 -->
+    <record id="action_approval_center_todo" model="ir.actions.client">
+        <field name="name">待办</field>
+        <field name="tag">tb_approval.center</field>
+        <field name="params" eval="{'tab': 'todo'}"/>
+    </record>
+    <record id="action_approval_center_done" model="ir.actions.client">
+        <field name="name">已办</field>
+        <field name="tag">tb_approval.center</field>
+        <field name="params" eval="{'tab': 'done'}"/>
+    </record>
+    <record id="action_approval_center_mine" model="ir.actions.client">
+        <field name="name">我发起</field>
+        <field name="tag">tb_approval.center</field>
+        <field name="params" eval="{'tab': 'mine'}"/>
+    </record>
+    <record id="action_approval_center_all" model="ir.actions.client">
+        <field name="name">全部审批</field>
+        <field name="tag">tb_approval.center</field>
+        <field name="params" eval="{'tab': 'all'}"/>
+    </record>
+
+    <!-- 审批任务 form（待办点开审批意见） -->
+    <record id="view_approval_task_form" model="ir.ui.view">
+        <field name="name">approval.task.form</field>
+        <field name="model">approval.task</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_approve" type="object" string="通过" class="btn-primary"
+                            invisible="state != 'pending'"/>
+                    <button name="action_reject" type="object" string="驳回" class="btn-danger"
+                            invisible="state != 'pending'"/>
+                    <button name="action_cancel_task" type="object" string="减签"
+                            invisible="state != 'pending'"/>
+                </header>
+                <sheet>
+                    <group>
+                        <field name="instance_id"/>
+                        <field name="node_id"/>
+                        <field name="user_id"/>
+                        <field name="state"/>
+                        <field name="comment"/>
+                        <field name="date_done"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+</odoo>

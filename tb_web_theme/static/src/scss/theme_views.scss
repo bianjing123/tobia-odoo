@@ -1,0 +1,852 @@
+// ------------------------------------------------------------------
+// Tobia Theme — View surfaces (light)
+// Every region is a rounded card on the soft mint page background:
+// control panel (header), record sheet (middle), chatter (side/footer).
+// ------------------------------------------------------------------
+
+// == Page canvas
+// Painted on the body (same element the dark scheme uses) instead of on
+// .o_content: the view containers between them paint their own opaque fill, so
+// a gradient set further in only ever shows through the 10px gutters.
+// Direction is diagonal (left→right + top→bottom, i.e. 135deg).
+.o_web_client {
+    background-color: #EAF1F8;
+    background-image:
+        radial-gradient(1000px 620px at 0% 0%, rgba(20, 169, 127, .10), transparent 62%),
+        radial-gradient(1000px 640px at 100% 100%, rgba(99, 102, 241, .09), transparent 60%),
+        linear-gradient(135deg, #F1FAF5 0%, #EAF1F8 46%, #E0E9F4 100%);
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+// == Page gutter: content is inset so cards float on the page background
+//
+// Layer chain from the body inwards is
+//   .o_web_client > .o_action_manager > .o_action > .o_content
+//     > .o_view_controller > .o_form_renderer / .o_list_renderer / .o_kanban_renderer
+//       > .o_form_sheet_bg > .o_form_sheet  (and the list/kanban cards)
+// Every layer above the cards paints its own fill in core, so they all have to
+// be cleared here; only the card level keeps an opaque surface.
+.o_web_client .o_action_manager,
+.o_web_client .o_action_manager > .o_action,
+.o_web_client .o_action_manager > .o_action > .o_content,
+.o_web_client .o_view_controller,
+.o_web_client .o_form_renderer,
+.o_web_client .o_list_renderer,
+.o_web_client .o_kanban_renderer {
+    background-color: transparent;
+    background-image: none;
+}
+
+.o_web_client .o_action_manager > .o_action > .o_content {
+    padding: o-to-rem(10px);
+}
+
+// == Cards share one whisper-thin diagonal, so big white areas still read as
+// lit from the top-left instead of as flat cut-outs
+.o_control_panel,
+.o_form_view .o_form_sheet,
+.o_list_renderer .o_list_table,
+.o_kanban_renderer .o_kanban_record {
+    background-image: linear-gradient(135deg, #FFFFFF 0%, #FDFEFF 100%);
+}
+
+// == Header card (breadcrumbs + action buttons + pager + search)
+.o_control_panel {
+    // token, so that dark mode can align the header with the sidebar surface
+    background-color: var(--tb-card-bg, #{$o-view-background-color});
+    // the header carries the page wash so the ramp stays readable behind it
+    background-image: linear-gradient(135deg, #E9F7F1 0%, #F8FBFD 46%, #EDF3FB 100%);
+    border: 1px solid var(--tb-card-border);
+    border-radius: var(--tb-card-radius);
+    box-shadow: var(--tb-card-shadow);
+    padding: o-to-rem(4px) o-to-rem(10px);
+    margin-top: o-to-rem(8px);
+    margin-bottom: o-to-rem(8px);
+
+    // the whole list header (toolbar, search pills, pager) reads one step
+    // smaller than the 14px body text, so it matches the table below
+    font-size: o-to-rem(13px);
+    line-height: 1.5;
+
+    .btn {
+        font-size: o-to-rem(12.5px);
+    }
+
+    .o_searchview,
+    .o_searchview_input,
+    .o_searchview_facet,
+    .o_facet_values,
+    .o_pager,
+    .o_pager_counter,
+    .o_pager_value,
+    .o_pager_limit {
+        font-size: o-to-rem(12.5px);
+    }
+}
+
+// == Search menu (筛选 / 分组方式 / 收藏) and the suggestion dropdown
+// Core builds the section titles from an `fs-5` wrapper plus an `h5`
+// (20px / 15.4px) while the menu items fall back to Bootstrap's 14px
+// dropdown size; everything is pinned to the 13px used by lists and kanban.
+.o_search_bar_menu,
+.o_searchview_autocomplete {
+    font-size: o-to-rem(13px);
+
+    .o_dropdown_title,
+    .dropdown-item {
+        font-size: o-to-rem(13px);
+    }
+
+    // `fs-5` is a Bootstrap utility, it ships !important
+    .fs-5 {
+        font-size: o-to-rem(13px) !important;
+    }
+}
+
+// == List
+.o_list_renderer .o_list_table {
+    // the table inherits the 14px body size; a data grid reads better one step
+    // smaller and with tighter leading (the theme raises the base line-height)
+    font-size: o-to-rem(13px);
+    line-height: 1.45;
+    border-radius: var(--tb-card-radius);
+    border: 1px solid var(--tb-card-border);
+    box-shadow: var(--tb-card-shadow);
+    background-color: rgba(255, 255, 255, .82);   // lets the page wash through
+
+    thead th {
+        background-color: rgba(246, 249, 250, .92);
+        color: $o-gray-700;
+        font-size: o-to-rem(12.5px);
+        font-weight: $font-weight-bold;
+        border-bottom: 1px solid var(--tb-card-border);
+    }
+
+    tbody td,
+    tbody th {
+        padding-top: o-to-rem(6px);
+        padding-bottom: o-to-rem(6px);
+    }
+
+    tbody tr.o_selected_row td,
+    tbody tr.o_selected_row th {
+        background-color: var(--tb-accent-soft);
+    }
+}
+
+// == Kanban
+.o_kanban_renderer .o_kanban_record {
+    border-radius: var(--tb-card-radius);
+    border: 1px solid var(--tb-card-border);
+    box-shadow: 0 1px 2px rgba(34, 52, 43, .04);
+    background-color: rgba(255, 255, 255, .86);
+}
+
+.o_kanban_renderer .o_kanban_group .o_kanban_header_title {
+    color: $o-gray-700;
+}
+
+// Kanban: one type size for the whole board.
+// Module kanban archs put Bootstrap utilities (`fs-5`, headings, `small`,
+// badges) on individual fields, so one card could show three different text
+// sizes. Everything inside the renderer is pinned to the 13px body size;
+// weights and colours still come from those classes.
+.o_kanban_renderer {
+    font-size: o-to-rem(13px);
+
+    // utility classes ship !important, so the override has to match it
+    :is(.fs-1, .fs-2, .fs-3, .fs-4, .fs-5, .fs-6),
+    :is(h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6, small, .small) {
+        font-size: o-to-rem(13px) !important;
+    }
+
+    .o_kanban_record_title,
+    .o_kanban_record_subtitle {
+        font-size: o-to-rem(13px);
+    }
+
+    .badge {
+        font-size: o-to-rem(13px);
+    }
+
+    // quick-create is a form control: it carries Bootstrap's form font size
+    // instead of inheriting the board size
+    .o_kanban_quick_create .form-control {
+        font-size: o-to-rem(13px);
+    }
+}
+
+// == Sale dashboard strip (counter cards + date range + period totals above
+// the list/kanban). Core prints the figures with `fs-4` (≈20px) while the
+// labels stay at 14px; pin the strip to the 13px used by the content below.
+.o_website_sale_dashboard,
+.o_sale_dashboard {
+    font-size: o-to-rem(13px);
+
+    // buttons carry their own Bootstrap font-size, so the card label does not
+    // inherit the strip size
+    .o_dashboard_card {
+        font-size: o-to-rem(13px);
+    }
+
+    // `fs-4` is a Bootstrap utility, it ships !important
+    .o_dashboard_card_data,
+    .o_cards_container .fs-4 {
+        font-size: o-to-rem(13px) !important;
+    }
+}
+
+// Settings (res.config.settings): core keeps 15px section titles / 13px tabs,
+// rows inherit the 14px form size and controls carry their own button/input
+// size. Everything is pinned to the 13px scale used across the theme.
+.o_base_settings_view .settings {
+    font-size: o-to-rem(13px);
+
+    // buttons and form controls don't inherit the container size
+    .btn,
+    .form-control,
+    .form-select {
+        font-size: o-to-rem(13px);
+    }
+
+    .app_settings_block {
+        h2 {
+            font-size: o-to-rem(13px);
+        }
+
+        h3 {
+            font-size: o-to-rem(13px);
+        }
+    }
+
+    // tag pills (pending invitations…) were Bootstrap's 0.75em
+    .badge {
+        font-size: o-to-rem(13px);
+    }
+
+    // help / secondary texts were one step below the rows
+    .o_setting_right_pane .text-muted {
+        font-size: o-to-rem(13px);
+    }
+}
+
+// == Discuss (对话 / 频道)
+// Chat keeps the 14px web-client body and mixes `fs-4`/`fs-5` channel titles
+// with `small` / `smaller` / `o-xsmaller` author, preview and timestamp
+// labels. Pin the app to the 13px scale used by the rest of the backoffice.
+.o-mail-Discuss {
+    font-size: o-to-rem(13px);
+
+    // utilities ship !important, the override has to match it
+    :is(.fs-1, .fs-2, .fs-3, .fs-4, .fs-5, .fs-6),
+    :is(h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6,
+        small, .small, .smaller, .o-xsmaller) {
+        font-size: o-to-rem(13px) !important;
+    }
+
+    // composer / search inputs are form controls and don't inherit the app size
+    .form-control {
+        font-size: o-to-rem(13px);
+    }
+}
+
+// == Dialogs (portaled on <body>, so no view container sizes them)
+.modal {
+    font-size: o-to-rem(13px);
+
+    // utilities ship !important, the override has to match it
+    :is(.fs-1, .fs-2, .fs-3, .fs-4, .fs-5, .fs-6),
+    :is(h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6,
+        small, .small, .smaller, .o-xsmaller) {
+        font-size: o-to-rem(13px) !important;
+    }
+
+    .modal-title,
+    .btn,
+    .form-control,
+    .form-select {
+        font-size: o-to-rem(13px);
+    }
+}
+
+// == Floating chat window & systray messaging menu
+.o-mail-ChatWindow,
+.o-mail-MessagingMenu {
+    font-size: o-to-rem(13px);
+
+    :is(.fs-1, .fs-2, .fs-3, .fs-4, .fs-5, .fs-6),
+    :is(h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6,
+        small, .small, .smaller, .o-xsmaller) {
+        font-size: o-to-rem(13px) !important;
+    }
+
+    .form-control {
+        font-size: o-to-rem(13px);
+    }
+}
+
+// == Calendar
+// FullCalendar sizes most of its text in `em`, so the base font-size set here
+// cascades to the toolbar, day cells, event chips and time labels.
+.o_calendar_container {
+    font-size: o-to-rem(13px);
+
+    // the current date range is an `h5`, filters use `small` chips
+    :is(h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6, small, .small) {
+        font-size: o-to-rem(13px);
+    }
+
+    .fc {
+        font-size: o-to-rem(13px);
+    }
+
+    .btn,
+    .form-control,
+    .form-select {
+        font-size: o-to-rem(13px);
+    }
+}
+
+// == Graph
+// The canvas labels (axes / legend / tooltips) are drawn by Chart.js and are
+// set in chart_font.js; this only covers the DOM chrome around the chart.
+.o_graph_renderer {
+    font-size: o-to-rem(13px);
+
+    .btn,
+    .form-control,
+    .form-select {
+        font-size: o-to-rem(13px);
+    }
+}
+
+// == Form: the sheet is the middle card
+//
+// Type scale: the form body keeps the 14px base, labels are pinned at 14px by
+// core, smart-button texts at 12px and titles/utilities add more steps. Pin
+// the whole form (chatter included) to the 13px scale used elsewhere.
+.o_form_view {
+    font-size: o-to-rem(13px);
+
+    // utilities ship !important, the override has to match it
+    :is(.fs-1, .fs-2, .fs-3, .fs-4, .fs-5, .fs-6),
+    :is(h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6,
+        small, .small, .smaller, .o-xsmaller) {
+        font-size: o-to-rem(13px) !important;
+    }
+
+    // labels, smart buttons and controls carry their own sizes
+    .o_form_label,
+    .o_stat_text,
+    .o_stat_value,
+    .btn,
+    .form-control,
+    .form-select {
+        font-size: o-to-rem(13px);
+    }
+}
+
+.o_form_view .o_form_sheet_bg {
+    // odoo adds this padding when the sheet has no statusbar; our layout moves
+    // the statusbar into the header, so it must be neutralised here
+    --formView-sheetBg-padding-top: 0;
+    background-color: transparent;
+    padding: 0;
+}
+
+.o_form_view .o_form_sheet {
+    background-color: rgba(255, 255, 255, .82);   // lets the page wash through
+    border: 1px solid var(--tb-card-border);
+    border-radius: var(--tb-card-radius);
+    box-shadow: var(--tb-card-shadow);
+}
+
+// Status bar inside the sheet reads as a pill row header
+.o_form_view .o_form_statusbar {
+    border-bottom: 1px solid var(--tb-card-border);
+    background-color: transparent;
+}
+
+// Required fields get a red asterisk.
+//
+// The marker is driven by odoo's `o_required_modifier` class instead of the
+// static `required` attribute: odoo recomputes that class at runtime, so a
+// field whose `required` is computed / conditional / parent-dependent shows
+// and hides the asterisk automatically. Readonly fields are excluded (their
+// widget carries `o_readonly_modifier` on the same element).
+//
+// DOM (web.FormLabel + form renderer):
+//   .o_cell.o_wrap_label > label.o_form_label
+//   .o_cell               > .o_field_widget.o_required_modifier
+.o_form_view .o_wrap_label {
+    &:has(+ .o_cell .o_required_modifier:not(.o_readonly_modifier)) .o_form_label::after {
+        content: "*";
+        margin-inline-start: o-to-rem(2px);
+        color: var(--tb-danger-text, #D9534F);
+        font-weight: $font-weight-bold;
+        line-height: 1;
+    }
+}
+
+// == Chatter card (right aside or below the sheet)
+.o-mail-ChatterContainer,
+.o-mail-Form-chatter {
+    // translucent so the page wash continues across the aside; the border is
+    // what separates it from the record sheet
+    background-color: rgba(255, 255, 255, .78);
+    background-image: none;
+    border: 1px solid var(--tb-card-border);
+    border-radius: var(--tb-card-radius);
+    box-shadow: var(--tb-card-shadow);
+    padding: o-to-rem(6px) o-to-rem(8px);
+}
+
+// Gap between the sheet card and the aside chatter card
+.o_form_sheet_bg + .o-mail-Form-chatter.o-aside {
+    margin-left: o-to-rem(10px);
+}
+
+// == Notebook tabs: segmented control — light track, the active page is a white
+// chip with the primary-green label (no outer border, thin dividers only)
+.o_notebook.horizontal {
+    --Notebook__link-border-color: transparent;
+    --Notebook__link-border-color--active: transparent;
+    --Notebook__link-border-color--hover: transparent;
+    --Notebook__link-border-top-color--active: transparent;
+
+    .o_notebook_headers {
+        margin-bottom: o-to-rem(6px);
+    }
+
+    .nav.nav-tabs {
+        display: inline-flex;
+        flex-wrap: nowrap;
+        gap: 0;
+        padding: o-to-rem(3px);
+        border: 0;
+        border-radius: o-to-rem(8px);
+        background-color: var(--tb-chip-bg);
+    }
+
+    .nav-item {
+        margin: 0;
+        border-right: 1px solid var(--tb-card-border);
+
+        &:last-child {
+            border-right: 0;
+        }
+
+        // the active tab already reads as a raised chip: no divider next to it
+        &:has(> .nav-link.active),
+        &:has(+ .nav-item > .nav-link.active) {
+            border-right-color: transparent;
+        }
+    }
+
+    .nav-link {
+        padding: o-to-rem(4px) o-to-rem(14px);
+        border: 0;
+        border-radius: o-to-rem(6px);
+        background-color: transparent;
+        box-shadow: none;
+        color: var(--tb-tab-text);
+        font-size: o-to-rem(13px);
+        line-height: 1.55;
+        transition: background-color .16s ease, color .16s ease;
+
+        &:hover,
+        &:focus {
+            border: 0;
+            background-color: var(--tb-tab-hover-bg);
+            color: var(--tb-tab-text-hover);
+        }
+
+        &.active {
+            &, &:hover, &:focus, &:active {
+                border: 0;
+                background-color: var(--tb-tab-active-bg);
+                box-shadow: 0 1px 2px rgba(16, 24, 40, .10);
+                color: var(--tb-accent);
+                font-weight: $font-weight-bold;
+            }
+        }
+
+        &.o_page_invalid {
+            color: var(--tb-danger-text);
+        }
+    }
+}
+
+// Smooth cross-fade when switching page
+// (the pane element is stable; its keyed child is remounted on switch)
+@media (prefers-reduced-motion: no-preference) {
+    .o_notebook .o_notebook_content > .tab-pane > * {
+        animation: tb-tab-in .18s ease both;
+    }
+}
+
+@keyframes tb-tab-in {
+    from {
+        opacity: 0;
+        transform: translateY(o-to-rem(4px));
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+// ==========================================================================
+// Record header — generic for every model (no view/model specific selector)
+//
+// DOM contract (web.StatusBarField / form renderer):
+//   .o_form_statusbar
+//     .o_statusbar_buttons > button.btn...
+//     .o_statusbar_status
+//       .o_arrow_button_wrap > button.o_arrow_button[.o_arrow_button_current]
+//
+// Domestic ERP convention: the first action of the header is the main action
+// and is therefore emphasised, while the state machine reads as a step trail
+// instead of a row of identical grey buttons.
+// ==========================================================================
+.o_form_statusbar {
+    .o_statusbar_buttons {
+        align-items: center;
+        gap: o-to-rem(6px);
+
+        > .btn {
+            min-height: 0;
+            height: o-to-rem(28px);
+            padding: 0 o-to-rem(12px);
+            border: 1px solid var(--tb-card-border);
+            border-radius: o-to-rem(8px);
+            background-color: $o-view-background-color;
+            color: var(--tb-tab-text-hover);
+            font-size: o-to-rem(12.5px);
+            box-shadow: none;
+
+            &:hover:not(:disabled) {
+                background-color: var(--tb-chip-bg-hover);
+            }
+        }
+
+        // icon-only actions read as circles
+        > .btn:has(> i:only-child) {
+            width: o-to-rem(28px);
+            padding: 0;
+            border-radius: 50%;
+        }
+
+        > .btn.btn-danger,
+        > .btn.text-danger {
+            background-color: var(--tb-danger-soft);
+            color: var(--tb-danger-text);
+        }
+    }
+
+    .o_statusbar_status {
+        gap: 0;
+
+        .o_arrow_button_wrap {
+            align-items: center;
+
+            &::before {
+                content: "·";
+                padding: 0 o-to-rem(6px);
+                color: var(--tb-tab-text);
+                opacity: .7;
+            }
+
+            // Odoo flags the first inline step: it takes no separator
+            &:has(> .o_arrow_button.o_first)::before {
+                content: none;
+            }
+        }
+
+        .o_arrow_button {
+            min-height: 0;
+            padding: o-to-rem(2px) 0;
+            border: 0;
+            border-radius: 0;
+            background-color: transparent;
+            color: var(--tb-tab-text);
+            font-size: o-to-rem(12.5px);
+            transition: color .16s ease;
+
+            &:hover:not(:disabled) {
+                background-color: transparent;
+                color: var(--tb-tab-text-hover);
+            }
+
+            &.o_arrow_button_current,
+            &[aria-current="step"] {
+                background-color: transparent;
+                box-shadow: inset 0 -2px 0 var(--tb-accent);
+                color: var(--tb-tab-text-hover);
+                font-weight: $font-weight-bold;
+                opacity: 1;
+            }
+
+            &:disabled:not(.o_arrow_button_current) {
+                opacity: .55;
+            }
+        }
+    }
+}
+
+// Breadcrumb: a muted navigation path, never competing with the record title
+.o_control_panel .o_breadcrumb {
+    font-size: o-to-rem(12.5px);
+
+    .breadcrumb {
+        margin-bottom: 0;
+        background-color: transparent;
+    }
+
+    // Clickable ancestors (the "back to ..." link) are the only navigation
+    // targets in this row: accent them so they read as clickable next to the
+    // muted path and current record name.
+    .breadcrumb-item a {
+        padding: 1px o-to-rem(5px);
+        margin: -1px o-to-rem(-5px);
+        border-radius: o-to-rem(4px);
+        color: var(--tb-accent);
+        font-weight: $font-weight-medium;
+        transition: background-color .16s ease, color .16s ease;
+
+        &:hover,
+        &:focus-visible {
+            background-color: var(--tb-accent-soft);
+            color: var(--tb-accent);
+            text-decoration: none;
+        }
+    }
+
+    .o_last_breadcrumb_item {
+        color: var(--tb-tab-text-hover);
+        font-weight: $font-weight-medium;
+    }
+}
+
+// Current menu / record name: core styles it with font-size: base !important
+// and bold !important, so it stays the biggest text in the header unless the
+// override carries the same weight.
+.o_control_panel .o_last_breadcrumb_item {
+    font-size: o-to-rem(13px) !important;
+    font-weight: $font-weight-medium !important;
+}
+
+// ==========================================================================
+// Record header — one card, two lines
+//
+// `tb_form_header` is set by the FormHeaderMerge component once the status bar
+// has been lifted into the control panel. The status bar itself becomes
+// `display: contents`, so its two halves join the header grid:
+//
+//   line 1:  报价单 · S00007              ...    报价单 — 已发送报价单 — 销售订单   ‹ 1 / 7 ›
+//   line 2:  新建 ▾  ⋯  创建发票  邮件  👁  ✕
+// ==========================================================================
+.o_control_panel.tb_form_header {
+    padding: o-to-rem(10px) o-to-rem(14px);
+
+    .o_control_panel_main {
+        display: grid !important;
+        align-items: center;
+        gap: o-to-rem(10px) o-to-rem(12px) !important;
+        // columns 1-2 are sized by their own buttons only: `min-content` stops
+        // the breadcrumb (which spans 3 columns on line 1) from widening them
+        grid-template-columns: min-content min-content minmax(0, 1fr) auto;
+        grid-template-areas:
+            "crumbs crumbs crumbs steps"
+            "new    btns   acts   nav";
+    }
+
+    .o_control_panel_breadcrumbs {
+        grid-area: crumbs;
+        gap: o-to-rem(4px);
+        min-width: 0;
+        overflow: hidden;
+    }
+
+    // one line only: "报价单 · S00007"
+    .o_breadcrumb {
+        flex-direction: row !important;
+        align-items: center;
+        gap: o-to-rem(2px);
+        min-width: 0;
+        white-space: nowrap;
+    }
+
+    // create / save sits on the second line, flush left
+    .o_control_panel_main_buttons {
+        grid-area: new;
+        justify-self: start;
+        width: max-content;
+        flex-wrap: nowrap !important;
+        gap: o-to-rem(6px) !important;
+
+        > .btn {
+            min-height: 0;
+            height: o-to-rem(28px);
+            padding: 0 o-to-rem(12px);
+            border: 1px solid var(--tb-card-border);
+            border-radius: o-to-rem(8px);
+            background-color: $o-view-background-color;
+            color: var(--tb-tab-text-hover);
+            font-size: o-to-rem(12.5px);
+            box-shadow: none;
+
+            &:hover:not(:disabled) {
+                background-color: var(--tb-chip-bg-hover);
+            }
+
+            &:first-child:not(.btn-link):not(.btn-danger) {
+                border-color: rgba(20, 169, 127, .22);
+                background-color: var(--tb-accent-soft);
+                color: var(--tb-accent);
+            }
+        }
+    }
+
+    .o_control_panel_navigation {
+        grid-area: nav;
+        justify-self: end;
+        width: auto !important;
+        gap: o-to-rem(8px) !important;
+    }
+
+    // smart buttons (button box) are centred on the whole header, not on the
+    // leftover space between the actions and the pager
+    .o_control_panel_actions {
+        grid-area: 2 / 1 / 3 / 5;
+        justify-self: center;
+        width: auto !important;
+        gap: o-to-rem(6px);
+
+        .o-form-buttonbox {
+            gap: o-to-rem(8px);
+            padding: 0;
+            border: 0;
+            background-color: transparent;
+
+            // each counter is its own block, not one ring around the group
+            > .btn {
+                padding: o-to-rem(4px) o-to-rem(10px);
+                border: 1px solid var(--tb-card-border);
+                border-radius: o-to-rem(10px);
+                background-color: $o-view-background-color;
+            }
+        }
+    }
+
+    // the lifted status bar dissolves into the grid
+    .o_control_panel_main > .o_form_statusbar {
+        display: contents !important;
+    }
+
+    // Pinned to the header's top-right corner. Absolute positioning keeps it
+    // independent of the auto-placed grid columns (grid-column was being
+    // ignored here, which left the trail sitting at the 1fr column's edge).
+    .o_control_panel_main {
+        position: relative;
+    }
+
+    .o_statusbar_status {
+        position: absolute;
+        top: 0;
+        right: 0;
+        display: flex;
+        justify-content: flex-end;
+        width: auto;
+
+        // "before/after ..." toggles are empty on most models yet still take
+        // their button width — that is the blank block on the right
+        > .dropdown:not(:last-child) {
+            display: none !important;
+        }
+    }
+
+    .o_statusbar_buttons {
+        grid-area: btns;
+        justify-self: start;
+        // bootstrap's `.flex-wrap` utility is `!important`, and a wrapping flex
+        // container has a min-content of one item, which stacks the buttons
+        width: max-content;
+        flex-wrap: nowrap !important;
+    }
+
+    // the button columns are `min-content`, which for CJK equals one
+    // character; nowrap + no-shrink keeps each column at its natural width
+    .o_statusbar_buttons > .btn,
+    .o_statusbar_buttons > .dropdown > .btn,
+    .o_control_panel_main_buttons > .btn,
+    .o_control_panel_main_buttons > .dropdown > .btn {
+        flex-shrink: 0;
+        white-space: nowrap;
+    }
+
+    // breadcrumb reads "报价单 · S00007"
+    .o_breadcrumb > div > .o_last_breadcrumb_item::before {
+        content: "·";
+        margin: 0 o-to-rem(4px);
+        color: var(--tb-tab-text);
+        font-weight: $font-weight-normal;
+    }
+
+    // pager: "1 / 7" + two round arrow buttons
+    .o_pager {
+        align-items: center;
+        height: auto !important;
+        gap: o-to-rem(8px) !important;
+
+        .o_pager_counter {
+            color: var(--tb-tab-text);
+            font-size: o-to-rem(12.5px);
+        }
+
+        .btn-group {
+            gap: o-to-rem(6px);
+        }
+
+        .btn-group > .btn {
+            width: o-to-rem(26px);
+            height: o-to-rem(26px);
+            padding: 0;
+            border: 1px solid var(--tb-card-border);
+            border-radius: 50% !important;
+            background-color: $o-view-background-color;
+            color: var(--tb-tab-text-hover);
+            box-shadow: none;
+
+            &:hover:not(:disabled) {
+                background-color: var(--tb-chip-bg);
+            }
+        }
+    }
+
+    // narrow screens: steps get their own line
+    @media (max-width: 992px) {
+        .o_control_panel_main {
+            grid-template-columns: minmax(0, 1fr) auto;
+            grid-template-areas:
+                "crumbs crumbs"
+                "steps  nav"
+                "new    new"
+                "btns   acts";
+        }
+
+        .o_control_panel_actions {
+            grid-area: 4 / 1 / 5 / 3;
+        }
+
+        .o_statusbar_status {
+            position: static;
+        }
+    }
+}
+
+// Left over by a previous record: Owl still owns it, so hide, never remove
+.o_form_statusbar.tb_form_header_stale {
+    display: none !important;
+}

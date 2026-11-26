@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <delete model="ir.access" id="access_approval_flow_manager"/>
+    <delete model="ir.access" id="access_approval_node_manager"/>
+    <delete model="ir.access" id="access_approval_transition_manager"/>
+    <delete model="ir.access" id="access_approval_flow_user"/>
+    <delete model="ir.access" id="access_approval_instance_user"/>
+    <delete model="ir.access" id="access_approval_instance_manager"/>
+    <delete model="ir.access" id="access_approval_task_user_own"/>
+    <delete model="ir.access" id="access_approval_task_user_read"/>
+    <delete model="ir.access" id="access_approval_task_manager"/>
+    <delete model="ir.access" id="access_approval_cc_user_read"/>
+    <delete model="ir.access" id="access_approval_cc_manager"/>
+    <delete model="ir.access" id="access_approval_token_manager"/>
+    <delete model="res.groups" id="group_approval_manager"/>
+</odoo>

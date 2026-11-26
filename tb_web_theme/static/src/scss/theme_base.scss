@@ -1,0 +1,177 @@
+// ------------------------------------------------------------------
+// Tobia Theme — Global tokens & shared rules (light)
+// Loaded at the end of web.assets_backend.
+// ------------------------------------------------------------------
+
+:root {
+    // Sidebar (overridden by the dark scheme in components.dark.scss)
+    // (custom-property values need #{} interpolation for scss functions)
+    --tb-sidebar-width: #{o-to-rem(200px)};
+    --tb-sidebar-collapsed-width: #{o-to-rem(56px)};
+    --tb-sidebar-bg: #FFFFFF;
+    --tb-sidebar-border: #E7ECF3;
+    --tb-sidebar-text: #3A4453;
+    --tb-sidebar-text-muted: rgba(58, 68, 83, .55);
+    --tb-sidebar-section: #98A2B3;
+    --tb-sidebar-item-hover: rgba(20, 169, 127, .14);
+    --tb-sidebar-item-active: #14A97F;
+    --tb-sidebar-item-active-text: #FFFFFF;
+    --tb-sidebar-active-shadow: 0 6px 14px -6px rgba(20, 169, 127, .65);
+    --tb-sidebar-card-bg: rgba(255, 255, 255, .55);
+    --tb-sidebar-card-border: #E7ECF3;
+    --tb-appsbar-text: #3A4453;
+    --tb-appsbar-active-bg: #E8F7F1;
+    --tb-appsbar-active-text: #0F7B5F;
+
+    // Cards & surfaces
+    --tb-card-radius: #{o-to-rem(16px)};
+    --tb-card-bg: #FFFFFF;
+    --tb-card-border: #E7ECF3;
+    --tb-card-shadow: 0 1px 2px rgba(16, 24, 40, .04), 0 12px 28px -26px rgba(16, 24, 40, .35);
+    --tb-accent: #{$o-brand-primary};
+    --tb-accent-soft: rgba(20, 169, 127, .10);
+    --tb-chip-bg: #F2F4F8;
+    --tb-chip-bg-hover: #E9EDF4;
+    --tb-danger-soft: #FDECEE;
+    --tb-danger-text: #E04B4F;
+
+    // Notebook (page tabs)
+    --tb-tab-text: #6B7688;
+    --tb-tab-text-hover: #2A3441;
+    --tb-tab-hover-bg: rgba(20, 169, 127, .06);
+    --tb-tab-active-bg: #FFFFFF;
+    --tb-tab-active-text: #1E2733;
+    --tb-tab-active-ring: #E3E8F0;
+}
+
+// == Scrollbars: thin, rounded thumb on an invisible track.
+//
+// Literal colours on purpose: when a var() inside a scrollbar pseudo element
+// fails to resolve, the declaration is dropped and the browser falls back to
+// its default (light) bar — which is exactly the bar that leaked into the dark
+// scheme. `scrollbar-width` / `scrollbar-color` are not used either, because
+// setting them makes Chromium ignore all ::-webkit-scrollbar rules.
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: rgba(58, 68, 83, .22);
+    border: 2px solid transparent;
+    border-radius: 999px;
+    background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(58, 68, 83, .38);
+}
+
+::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+// Firefox only: `-moz-appearance` is unknown to Chromium/Safari, so this block
+// never matches there and the ::-webkit-* rules above stay in charge.
+@supports (-moz-appearance: none) {
+    * {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(58, 68, 83, .22) transparent;
+    }
+}
+
+// == Pill buttons (all action buttons are full pills in the screenshots)
+.btn {
+    border-radius: o-to-rem(100px);
+    font-weight: $font-weight-medium;
+}
+
+// == Numeric alignment: money / quantities line up in columns
+.o_list_table td,
+.o_list_table th,
+.o_field_monetary,
+.o_field_float,
+.o_field_integer,
+.o_field_percentage {
+    font-variant-numeric: tabular-nums;
+}
+
+// == Navbar: app name + its section menus now live in the left sidebar
+.o_main_navbar {
+    // Core paints every navbar entry with
+    // var(--NavBar-entry-backgroundColor, $o-navbar-background); without
+    // this the entries would show up as solid $o-navbar-background blocks.
+    --NavBar-entry-backgroundColor: transparent;
+
+    // same diagonal wash as the page, one step lighter (left→right + top→bottom)
+    background: linear-gradient(135deg, #E7F6EF 0%, #F5FBF8 48%, #E9F0FA 100%);
+
+    // Hide brand + core sections on desktop — theme's own .tb_apps_bar
+    // replaces them. Small screens MUST keep .o_menu_toggle visible because
+    // the native NavBar.AppsMenu renders the burger button as a.o_menu_toggle
+    // there (it is the only app/sub-menu entry point on mobile).
+    @include media-breakpoint-up(md) {
+        .o_menu_toggle,
+        .o_menu_brand,
+        .o_menu_sections {
+            display: none !important;
+        }
+    }
+}
+
+// == Colour scheme toggle: bare icon, same interaction as a navbar entry
+.tb_theme_scheme_toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: o-to-rem(28px);
+    height: o-to-rem(28px);
+    padding: 0;
+    border: 0;
+    border-radius: o-to-rem(100px);
+    background-color: transparent;
+    color: var(--NavBar-entry-color, inherit);
+    cursor: pointer;
+    transition: background-color .16s ease, color .16s ease;
+
+    &:hover {
+        background-color: var(--NavBar-entry-backgroundColor--hover, rgba(58, 163, 130, .12));
+        color: var(--NavBar-entry-color--hover, #1A4A3C);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tb-accent);
+        outline-offset: 2px;
+    }
+}
+
+// == Pill badges / tags
+.badge {
+    border-radius: o-to-rem(100px);
+}
+
+// == Rounded dialogs & dropdown menus
+.modal-content {
+    border-radius: $o-border-radius-xl;
+    border: 1px solid var(--tb-card-border);
+    box-shadow: 0 20px 60px -20px rgba(29, 46, 38, .35);
+}
+
+// Menus are portaled away from their toggle, so they carry their own size:
+// Bootstrap defaults to 14px, the theme keeps the 13px scale everywhere.
+.dropdown-menu {
+    font-size: o-to-rem(13px);
+    border-radius: $o-border-radius-lg;
+    border: 1px solid var(--tb-card-border);
+    box-shadow: 0 16px 40px -16px rgba(29, 46, 38, .3);
+}
+
+// == Search bar pill
+.o_searchview {
+    border-radius: o-to-rem(100px);
+    background-color: $o-view-background-color;
+}

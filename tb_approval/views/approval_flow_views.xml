@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- 流程定义 list -->
+    <record id="view_approval_flow_list" model="ir.ui.view">
+        <field name="name">approval.flow.list</field>
+        <field name="model">approval.flow</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="version_label"/>
+                <field name="model_id"/>
+                <field name="instance_count"/>
+                <field name="active" widget="boolean_toggle"/>
+                <button name="action_open_designer" type="object" string="设计流程" icon="fa-sitemap"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- 流程定义 form -->
+    <record id="view_approval_flow_form" model="ir.ui.view">
+        <field name="name">approval.flow.form</field>
+        <field name="model">approval.flow</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_open_designer" type="object" string="打开流程设计器"
+                            class="btn-primary"/>
+                    <button name="action_view_versions" type="object" string="查看版本记录"/>
+                </header>
+                <sheet>
+                    <field name="instance_count" invisible="1"/>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="流程名称，如：采购单审批"
+                                   readonly="instance_count &gt; 0 or superseded_by_id"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="model_id" readonly="instance_count &gt; 0 or superseded_by_id"/>
+                            <field name="model_name" invisible="1"/>
+                            <field name="version_label" readonly="1"/>
+                            <field name="superseded_by_id" readonly="1" invisible="not superseded_by_id"/>
+                        </group>
+                        <group>
+                            <field name="active" widget="boolean_toggle" readonly="superseded_by_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="流程图">
+                            <div class="tb-flow-page">
+                                <div class="tb-flow-page-content">
+                                    <field name="diagram_data" widget="flow_preview" readonly="1" nolabel="1"/>
+                                </div>
+                            </div>
+                        </page>
+                        <page string="节点">
+                            <field name="node_ids" readonly="instance_count &gt; 0 or superseded_by_id">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="node_type"/>
+                                    <field name="approve_mode" optional="hide"/>
+                                    <field name="x" column_invisible="1"/>
+                                    <field name="y" column_invisible="1"/>
+                                </list>
+                                <form string="节点配置">
+                                    <sheet>
+                                        <group>
+                                            <group>
+                                                <field name="name"/>
+                                                <field name="node_type"/>
+                                                <field name="sequence"/>
+                                            </group>
+                                            <group>
+                                                <field name="approve_mode"
+                                                       invisible="node_type != 'approval'"/>
+                                                <field name="auto_pass_no_approver"
+                                                       invisible="node_type != 'approval'"/>
+                                                <field name="sub_flow_id"
+                                                       invisible="node_type != 'subflow'"/>
+                                                <field name="approver_user_ids" widget="many2many_tags"
+                                                       invisible="node_type not in ('approval', 'cc')"/>
+                                                <field name="approver_group_id"
+                                                       invisible="node_type != 'approval'"/>
+                                                <field name="cc_user_ids" widget="many2many_tags"
+                                                       invisible="node_type != 'cc'"/>
+                                            </group>
+                                        </group>
+                                    </sheet>
+                                </form>
+                            </field>
+                        </page>
+                        <page string="连线">
+                            <field name="transition_ids" readonly="instance_count &gt; 0 or superseded_by_id">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="from_node_id"/>
+                                    <field name="to_node_id"/>
+                                    <field name="condition"/>
+                                    <field name="is_default"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="说明">
+                            <field name="note" readonly="instance_count &gt; 0 or superseded_by_id"/>
+                        </page>
+                        <page string="动态">
+                            <chatter/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_approval_flow" model="ir.actions.act_window">
+        <field name="name">流程定义</field>
+        <field name="res_model">approval.flow</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('superseded_by_id', '=', False)]</field>
+    </record>
+
+</odoo>

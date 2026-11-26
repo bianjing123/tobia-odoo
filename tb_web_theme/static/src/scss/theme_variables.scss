@@ -1,0 +1,92 @@
+// ------------------------------------------------------------------
+// Tobia Theme — Light tokens
+// Injected BEFORE web/primary_variables.scss: every derived variable
+// in odoo and bootstrap is computed from the values below.
+// All declarations use !default so the dark file (declared after this
+// one inside web.assets_web_dark) overrides them at compile time.
+// ------------------------------------------------------------------
+
+// Brand (mint green from the reference screenshots)
+$o-brand-odoo: #14A97F !default;
+$o-brand-primary: #14A97F !default;
+
+// Typography — CJK-first fallback chain.
+// Odoo 20's default stack (Apple / Segoe UI / Roboto / Noto Sans) has no
+// Chinese glyphs, so Chinese text fell back to whatever the OS picked.
+// CJK faces are appended after the latin ones: latin text keeps its look,
+// Chinese characters resolve to a proper Chinese font on every platform.
+$o-system-fonts: (
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Ubuntu,
+    "Noto Sans",
+    Arial,
+    "PingFang SC",
+    "HarmonyOS Sans SC",
+    "Source Han Sans SC",
+    "Noto Sans CJK SC",
+    "Microsoft YaHei",
+    "WenQuanYi Micro Hei",
+    sans-serif,
+    "Apple Color Emoji",
+    "Segoe UI Emoji",
+    "Segoe UI Symbol",
+    "Noto Color Emoji"
+) !default;
+
+// Chinese glyphs are taller than latin ones: a bit more leading reads better
+$o-line-height-base: 1.6 !default;
+
+// Semantic actions
+$o-success: #2E9E6B !default;
+$o-info: #3E8FB8 !default;
+$o-warning: #E8A33D !default;
+$o-danger: #E0483F !default;
+
+// Fine-tuned contextual text colors
+$o-theme-text-colors: (
+    "success": #1F7A50,
+    "info": #2F7397,
+    "warning": #8F6210,
+    "danger": #C43A32,
+) !default;
+
+// Grays — green-tinted neutrals
+$o-gray-100: #F6F8FC !default;
+$o-gray-200: #EEF1F7 !default;
+$o-gray-300: #DDE3EC !default;
+$o-gray-400: #C2CAD7 !default;
+$o-gray-500: #98A2B3 !default;
+$o-gray-600: #6B7688 !default;
+$o-gray-700: #4A5464 !default;
+$o-gray-800: #333C4A !default;
+$o-gray-900: #1E2733 !default;
+
+// Surfaces
+$o-view-background-color: #FFFFFF !default;
+$o-webclient-background-color: #F3F6FB !default;
+
+// Borders & radii (rounded, pill-friendly look)
+$o-border-color: #E6EBF3 !default;
+$o-border-radius: o-to-rem(8px) !default;
+$o-border-radius-sm: o-to-rem(6px) !default;
+$o-border-radius-lg: o-to-rem(12px) !default;
+$o-border-radius-xl: o-to-rem(16px) !default;
+
+// Text
+$o-main-headings-color: #1E2733 !default;
+$o-main-link-color: darken($o-brand-primary, 8%) !default;
+$o-main-code-color: #C23A78 !default;
+
+// Components
+// ($o-action is not defined yet at this point in the bundle; its default
+// value equals $o-brand-primary, which we control above)
+$o-component-active-bg: #E7F7F1 !default;
+$o-component-active-border: $o-brand-primary !default;
+
+// Forms & lists
+$o-form-lightsecondary: #C7DACE !default;
+$o-list-group-active-bg: #DFEFF6 !default;

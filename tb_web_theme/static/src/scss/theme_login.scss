@@ -1,0 +1,54 @@
+// ------------------------------------------------------------------
+// Tobia login screen — desktop + mobile responsive overrides.
+// Loaded via web.assets_web (the bundle web.login_layout uses).
+// ------------------------------------------------------------------
+
+body.tb_login_page {
+    // Replace core bg-100 (opaque #F8F9FA) so the uploaded picture shows
+    background-color: transparent !important;
+    // vh works on both desktop & mobile Chrome/Safari 15.4+ (small-address-bar fix)
+    min-height: 100vh !important;
+    min-height: 100dvh !important;
+    display: flex !important;
+    flex-flow: column nowrap !important;
+
+    // iOS Safari / Android: fixed attachment clips to the initially visible
+    // viewport. scroll keeps the full image visible on any device.
+    background-attachment: scroll !important;
+
+    // Wrapwrap already has display:flex and min-height:100% in Odoo core.
+    // Just make sure it and its descendants fill the viewport column.
+    #wrapwrap {
+        flex: 1 1 auto;
+        display: flex;
+        flex-flow: column nowrap;
+    }
+
+    main {
+        flex: 1 1 auto;
+        display: flex;
+        flex-flow: column nowrap;
+    }
+
+    .container.py-5 {
+        flex: 1 1 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        // unset core's heavy vertical padding so the card is free to center
+        padding: o-to-rem(16px) o-to-rem(12px) !important;
+    }
+
+    .o_database_list.card {
+        // core locks max-width to 300px — release it on narrow screens
+        max-width: 100% !important;
+        width: 100%;
+        @include media-breakpoint-up(md) {
+            max-width: o-to-rem(360px) !important;
+            width: auto;
+        }
+        margin: 0 !important;
+        border-radius: o-to-rem(16px);
+        box-shadow: 0 10px 30px -12px rgba(0, 0, 0, .18);
+    }
+}

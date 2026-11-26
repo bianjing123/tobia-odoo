@@ -1,0 +1,504 @@
+// ------------------------------------------------------------------
+// Tobia Theme — Permanent sidebar & layout shift
+// Colors come from --tb-* CSS variables (dark overrides them in
+// components.dark.scss, no extra rules needed here).
+// ------------------------------------------------------------------
+
+// == Layout shift: content is always pushed aside (rail or full width)
+// 8px page gutter on each side of the floating sidebar card
+body.o_web_client.tb_has_sidebar {
+    > .o_action_manager {
+        margin-left: calc(var(--tb-sidebar-collapsed-width) + #{o-to-rem(16px)});
+        margin-right: o-to-rem(8px);
+        transition: margin-left .18s ease;
+    }
+
+    &.tb_sidebar_expanded > .o_action_manager {
+        margin-left: calc(var(--tb-sidebar-width) + #{o-to-rem(16px)});
+    }
+}
+
+// == Sidebar itself: a floating rounded card
+.tb_theme_sidebar {
+    position: fixed;
+    top: calc(var(--o-navbar-height, #{$o-navbar-height}) + #{o-to-rem(8px)});
+    left: o-to-rem(8px);
+    bottom: o-to-rem(8px);
+    width: var(--tb-sidebar-width);
+    display: flex;
+    flex-flow: column nowrap;
+    // light scheme: translucent diagonal mint, so the page wash reads through
+    // the panel (dark keeps its own opaque gradient in components.dark.scss)
+    background-color: transparent;
+    background-image: linear-gradient(135deg,
+        rgba(206, 240, 227, .80) 0%,
+        rgba(238, 249, 244, .62) 48%,
+        rgba(216, 238, 235, .74) 100%);
+    border: 1px solid var(--tb-sidebar-border);
+    border-radius: var(--tb-card-radius);
+    box-shadow: var(--tb-card-shadow);
+    padding: o-to-rem(12px) o-to-rem(10px) o-to-rem(16px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    z-index: 20;
+    color: var(--tb-sidebar-text);
+    transition: width .18s ease;
+
+    &.tb_sidebar_collapsed {
+        width: var(--tb-sidebar-collapsed-width);
+        padding-left: o-to-rem(6px);
+        padding-right: o-to-rem(6px);
+
+        .tb_sidebar_head {
+            justify-content: center;
+            padding: 0;
+        }
+    }
+}
+
+// == Collapsed rail: one circular icon per section
+.tb_sidebar_nav_compact {
+    align-items: center;
+    gap: o-to-rem(8px);
+}
+
+.tb_sidebar_disc {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: o-to-rem(34px);
+    height: o-to-rem(34px);
+    flex: none;
+    border-radius: o-to-rem(10px);
+    background-color: var(--tb-disc-color, var(--tb-sidebar-item-active));
+    color: #FFFFFF;
+    font-size: o-to-rem(13px);
+    font-weight: $font-weight-bold;
+    text-decoration: none;
+    cursor: pointer;
+    user-select: none;
+    transition: transform .12s ease, box-shadow .12s ease;
+
+    &:hover,
+    &:focus {
+        color: #FFFFFF;
+        text-decoration: none;
+        outline: none;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 12px -6px rgba(0, 0, 0, .45);
+    }
+}
+
+// == Head
+.tb_sidebar_head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: o-to-rem(10px);
+    padding: 0 o-to-rem(4px);
+}
+
+.tb_sidebar_title {
+    font-size: o-to-rem(11px);
+    font-weight: $font-weight-bold;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--tb-sidebar-section);
+}
+
+.tb_sidebar_toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: o-to-rem(30px);
+    height: o-to-rem(30px);
+    padding: 0;
+    border: 0;
+    border-radius: o-to-rem(100px);
+    background: transparent;
+    color: var(--tb-sidebar-text-muted);
+    cursor: pointer;
+
+    &:hover,
+    &:focus {
+        background-color: var(--tb-sidebar-item-hover);
+        color: var(--tb-sidebar-text);
+        outline: none;
+    }
+}
+
+// == Navigation
+.tb_sidebar_nav {
+    display: flex;
+    flex-flow: column nowrap;
+    gap: o-to-rem(8px);
+}
+
+// == Group card (screenshot style: white rounded card per section)
+.tb_sidebar_group {
+    display: flex;
+    flex-flow: column nowrap;
+    gap: 2px;
+    background-color: var(--tb-sidebar-card-bg);
+    border: 1px solid var(--tb-sidebar-card-border);
+    border-radius: o-to-rem(12px);
+    padding: o-to-rem(6px) o-to-rem(8px);
+}
+
+.tb_sidebar_group_title {
+    padding: o-to-rem(4px) o-to-rem(8px) o-to-rem(2px);
+    font-size: o-to-rem(10.5px);
+    font-weight: $font-weight-bold;
+    letter-spacing: .06em;
+    color: var(--tb-sidebar-section);
+}
+
+// sub-heading for a container menu (one that only groups other menus)
+.tb_sidebar_subgroup {
+    padding: o-to-rem(6px) o-to-rem(10px) o-to-rem(2px);
+    padding-left: calc(o-to-rem(10px) + var(--tb-depth, 0) * o-to-rem(10px));
+    font-size: o-to-rem(11px);
+    font-weight: $font-weight-bold;
+    color: var(--tb-sidebar-section);
+}
+
+.tb_sidebar_item {
+    display: flex;
+    align-items: center;
+    gap: o-to-rem(8px);
+    padding: o-to-rem(6px) o-to-rem(10px);
+    padding-left: calc(o-to-rem(10px) + var(--tb-depth, 0) * o-to-rem(10px));
+    border-radius: o-to-rem(100px);
+    color: var(--tb-sidebar-text);
+    text-decoration: none;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color .14s ease, color .14s ease, box-shadow .14s ease;
+
+    &:hover,
+    &:focus {
+        background-color: var(--tb-sidebar-item-hover);
+        color: var(--tb-sidebar-text);
+        text-decoration: none;
+        outline: none;
+    }
+
+    // pressed feedback: the row dips to the accent tint before the action loads
+    &:active {
+        background-color: var(--tb-sidebar-item-active);
+        color: var(--tb-sidebar-item-active-text);
+    }
+
+    &.active {
+        background-color: var(--tb-sidebar-item-active);
+        color: var(--tb-sidebar-item-active-text);
+        box-shadow: var(--tb-sidebar-active-shadow);
+        font-weight: $font-weight-bold;
+    }
+}
+
+.tb_sidebar_label {
+    flex: 1 1 auto;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: o-to-rem(13px);
+    line-height: 1.6;
+}
+
+// Small leading icon of a menu entry (inline svg, see sidebar.js)
+.tb_sidebar_item_icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: o-to-rem(15px);
+    height: o-to-rem(15px);
+    flex: none;
+    color: var(--tb-sidebar-section);
+    opacity: .9;
+
+    svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+    }
+
+    .tb_sidebar_item:hover &,
+    .tb_sidebar_item:focus & {
+        color: var(--tb-sidebar-text);
+        opacity: 1;
+    }
+
+    .tb_sidebar_item.active & {
+        color: inherit;
+        opacity: 1;
+    }
+}
+
+.tb_sidebar_chevron {
+    display: flex;
+    align-items: center;
+    color: inherit;
+    opacity: .6;
+    transition: transform .15s ease;
+
+    .tb_sidebar_expanded > .tb_sidebar_item &,
+    .tb_sidebar_node.tb_sidebar_expanded > .tb_sidebar_item & {
+        transform: rotate(90deg);
+    }
+}
+
+// == App icon (image / odoo icon / letter avatar)
+.tb_sidebar_icon_img {
+    width: o-to-rem(26px);
+    height: o-to-rem(26px);
+    border-radius: o-to-rem(8px);
+    object-fit: contain;
+    flex: none;
+}
+
+.tb_sidebar_icon_oi {
+    width: o-to-rem(26px);
+    font-size: o-to-rem(20px);
+    text-align: center;
+    flex: none;
+}
+
+.tb_sidebar_letter {
+    width: o-to-rem(26px);
+    height: o-to-rem(26px);
+    border-radius: o-to-rem(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: o-to-rem(12px);
+    font-weight: $font-weight-bold;
+    color: #FFFFFF;
+    flex: none;
+}
+
+// == Child nodes (recursive)
+.tb_sidebar_node > .tb_sidebar_item {
+    padding: o-to-rem(6px) o-to-rem(10px);
+}
+
+.tb_sidebar_node > .tb_sidebar_item .tb_sidebar_label {
+    font-size: o-to-rem(13px);
+    color: var(--tb-sidebar-text-muted);
+}
+
+.tb_sidebar_node > .tb_sidebar_item:hover .tb_sidebar_label,
+.tb_sidebar_node > .tb_sidebar_item:focus .tb_sidebar_label {
+    color: var(--tb-sidebar-text);
+}
+
+// an active child sits on the accent pill, so its muted label must invert too
+.tb_sidebar_node > .tb_sidebar_item.active .tb_sidebar_label {
+    color: var(--tb-sidebar-item-active-text);
+}
+
+.tb_sidebar_children {
+    display: flex;
+    flex-flow: column nowrap;
+    gap: 2px;
+    margin: 0 0 4px o-to-rem(14px);
+    padding-left: o-to-rem(8px);
+    border-left: 2px solid var(--tb-sidebar-border);
+}
+
+// == Small screens: the core burger menu takes over, hide the sidebar
+@include media-breakpoint-down(lg) {
+    .tb_theme_sidebar {
+        display: none !important;
+    }
+
+    body.o_web_client.tb_has_sidebar > .o_action_manager,
+    body.o_web_client.tb_has_sidebar.tb_sidebar_expanded > .o_action_manager {
+        margin-left: 0;
+    }
+}
+
+// == Mobile app-menu / user-menu slider (core markup, portaled to <body>)
+// Core derives these from `$o-burger-topbar-bg: $o-gray-100` and
+// `$o-burger-topbar-color: $o-black`. Only the background variable follows the
+// colour scheme, so the panel and its text can end up with the same tone.
+// Both schemes are therefore declared explicitly here (see components.dark.scss
+// for the dark values).
+.o_app_menu_sidebar,
+.o_burger_menu {
+    .o_sidebar_topbar {
+        background-color: transparent;
+        background-image: linear-gradient(135deg, #E7F6EF 0%, #F5FBF8 48%, #E9F0FA 100%);
+        color: var(--tb-sidebar-text);
+        box-shadow: inset 0 -1px 0 var(--tb-card-border);
+    }
+
+    .o_burger_menu_content,
+    .o_burger_menu_content.o_burger_menu_app {
+        background-color: #FFFFFF;
+        color: var(--tb-sidebar-text);
+    }
+
+    .o_burger_menu_content li > a,
+    .o_burger_menu_content li > div {
+        color: var(--tb-sidebar-text);
+    }
+
+    .o_burger_menu_content li:hover,
+    .o_burger_menu_content li:focus-within {
+        background-color: var(--tb-sidebar-item-hover);
+    }
+}
+
+// == Horizontal apps bar in the navbar (replaces the apps dropdown)
+// Strategy: hard max-width in viewport units so the NavBar can't grow;
+// JS then moves clipped pills into the sibling .tb_apps_more dropdown.
+.tb_apps_bar {
+    display: flex;
+    align-items: center;
+    gap: o-to-rem(1px);
+    flex: 0 0 auto;
+    width: max-content;
+    max-width: calc(100vw - 320px);   // hard cap: reserve space for systray
+    min-width: 0;
+    overflow: hidden;
+    flex-wrap: nowrap;
+}
+
+// NavBar must allow the "更多" dropdown to overflow visually
+.o_main_navbar {
+    overflow: visible !important;
+}
+
+// "更多" dropdown button + hidden items panel
+.tb_apps_more {
+    position: relative;
+    flex: none;
+    display: flex;
+    align-items: center;
+    z-index: 100;          // ensure panel z-index children work
+}
+
+.tb_apps_more_toggle {
+    display: flex;
+    align-items: center;
+    gap: o-to-rem(4px);
+    padding: o-to-rem(3px) o-to-rem(8px);
+    border-radius: o-to-rem(100px);
+    font-size: o-to-rem(13px);
+    color: var(--tb-appsbar-text);
+    background-color: transparent;
+    border: 0;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.tb_apps_more_toggle:hover,
+.tb_apps_more_toggle:focus {
+    background-color: var(--tb-sidebar-item-hover);
+    color: var(--tb-appsbar-active-text);
+    outline: none;
+}
+
+.tb_apps_more_panel {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    min-width: o-to-rem(200px);
+    max-width: o-to-rem(260px);
+    max-height: o-to-rem(360px);
+    overflow-y: auto;
+    padding: o-to-rem(6px);
+    background-color: var(--tb-dropdown-bg, rgba(255, 255, 255, .92));
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    border: 1px solid var(--tb-dropdown-border, rgba(255, 255, 255, .55));
+    border-radius: o-to-rem(12px);
+    box-shadow: 0 16px 40px -16px rgba(29, 46, 38, .22);
+    display: none;
+    z-index: 1000;                 // always on top of sidebar (z-index:20)
+}
+
+.tb_apps_more.open .tb_apps_more_panel {
+    display: block;
+}
+
+.tb_apps_more_item {
+    display: flex;
+    align-items: center;
+    gap: o-to-rem(8px);
+    padding: o-to-rem(6px) o-to-rem(10px);
+    border-radius: o-to-rem(8px);
+    color: var(--tb-appsbar-text);
+    text-decoration: none;
+    font-size: o-to-rem(13px);
+    white-space: nowrap;
+}
+
+.tb_apps_more_item:hover {
+    background-color: var(--tb-sidebar-item-hover);
+    color: var(--tb-appsbar-active-text);
+    text-decoration: none;
+}
+
+.tb_apps_bar_brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: o-to-rem(24px);
+    height: o-to-rem(24px);
+    margin-left: o-to-rem(10px);
+    margin-right: o-to-rem(6px);
+    flex: none;
+    text-decoration: none;
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display: block;
+    }
+}
+
+.tb_apps_bar_item {
+    display: flex;
+    align-items: center;
+    gap: o-to-rem(4px);
+    padding: o-to-rem(3px) o-to-rem(8px);
+    border-radius: o-to-rem(100px);
+    white-space: nowrap;
+    flex: none;
+    font-size: o-to-rem(13px);
+    color: var(--tb-appsbar-text);
+    text-decoration: none;
+    cursor: pointer;
+    user-select: none;
+
+    &:hover,
+    &:focus {
+        background-color: var(--tb-sidebar-item-hover);
+        color: var(--tb-appsbar-active-text);
+        text-decoration: none;
+        outline: none;
+    }
+
+    &.active {
+        background-color: var(--tb-appsbar-active-bg);
+        color: var(--tb-appsbar-active-text);
+        font-weight: $font-weight-bold;
+    }
+}
+
+.tb_apps_bar_icon_img {
+    width: o-to-rem(14px);
+    height: o-to-rem(14px);
+    border-radius: o-to-rem(4px);
+    object-fit: contain;
+    flex: none;
+}
+
+.tb_apps_bar_icon_oi {
+    font-size: o-to-rem(12px);
+    flex: none;
+}

@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="tb_approval.FlowWorkspace">
+        <div class="tb-ws" tabindex="0" t-ref="this.workspaceRef" t-on-keydown="(ev) => this.onKeyDown(ev)">
+            <div class="tb-ws-top">
+                <button type="button" class="tb-ws-back" t-on-click="() => this.back()"><i class="fa fa-arrow-left"/> 返回</button>
+                <strong t-esc="this.state.flow?.name || '流程定义'"/>
+                <span class="tb-ws-badge" t-esc="this.state.flow?.version_label || 'V1.0'"/>
+                <span class="tb-ws-badge" t-esc="this.state.flow?.active ? '启用' : '停用'"/>
+                <span class="tb-ws-dirty" t-if="this.state.dirty">未保存</span>
+                <div class="tb-ws-spacer"/>
+                <button type="button" title="撤销" t-on-click="() => this.undo()"><i class="fa fa-undo"/></button>
+                <button type="button" title="重做" t-on-click="() => this.redo()"><i class="fa fa-repeat"/></button>
+                <button type="button" title="按流程方向整理节点和连线" t-on-click="() => this.arrange()"><i class="fa fa-sitemap"/> 一键整理</button>
+                <button type="button" title="缩小" t-on-click="() => this.zoom(-1)"><i class="fa fa-search-minus"/></button>
+                <span t-esc="this.state.zoom + '%'"/>
+                <button type="button" title="放大" t-on-click="() => this.zoom(1)"><i class="fa fa-search-plus"/></button>
+                <button type="button" title="适应画布" t-on-click="() => this.fit()"><i class="fa fa-expand"/></button>
+                <button type="button" class="tb-ws-save" t-att-disabled="this.state.saving || !this.state.dirty" t-on-click="() => this.save()"><i class="fa fa-save"/> 保存并发布</button>
+            </div>
+            <div class="tb-ws-body">
+                <aside class="tb-ws-palette">
+                    <h3>流程组件</h3>
+                    <p>拖拽到画布或点击添加</p>
+                    <button type="button" class="tb-ws-arrange" t-on-click="() => this.arrange()">
+                        <i class="fa fa-sitemap"/> 一键整理流程图
+                    </button>
+                    <h4>基础节点</h4>
+                    <t t-foreach="[['start','开始'],['end','结束']]" t-as="item" t-key="item[0]">
+                        <div class="tb-ws-palette-item" t-att-data-kind="item[0]"
+                             t-on-mousedown="(ev) => this.dragStart(ev, item[0], item[1])" t-on-click="() => this.addNode(item[0], item[1])">
+                            <span class="tb-ws-palette-icon"/><t t-esc="item[1]"/>
+                        </div>
+                    </t>
+                    <h4>审批节点</h4>
+                    <t t-foreach="[['approval','人工审批'],['service','服务任务']]" t-as="item" t-key="item[1]">
+                        <div class="tb-ws-palette-item" t-att-data-kind="item[0]"
+                             t-on-mousedown="(ev) => this.dragStart(ev, item[0], item[1])" t-on-click="() => this.addNode(item[0], item[1])">
+                            <span class="tb-ws-palette-icon"/><t t-esc="item[1]"/>
+                        </div>
+                    </t>
+                    <h4>流程分支</h4>
+                    <t t-foreach="[['exclusive','排他网关'],['exclusive_join','排他汇聚'],['parallel_split','并行分支'],['parallel_join','并行汇聚']]" t-as="item" t-key="item[0]">
+                        <div class="tb-ws-palette-item" t-att-data-kind="item[0]"
+                             t-on-mousedown="(ev) => this.dragStart(ev, item[0], item[1])" t-on-click="() => this.addNode(item[0], item[1])">
+                            <span class="tb-ws-palette-icon"/><t t-esc="item[1]"/>
+                        </div>
+                    </t>
+                    <h4>业务管理</h4>
+                    <t t-foreach="[['approval','审批'],['approval','订单审核'],['approval','信用检查'],['approval','出货审批'],['approval','付款审批'],['cc','通知'],['cc','抄送']]" t-as="item" t-key="item[1]">
+                        <div class="tb-ws-palette-item" t-att-data-kind="item[0]"
+                             t-on-mousedown="(ev) => this.dragStart(ev, item[0], item[1])" t-on-click="() => this.addNode(item[0], item[1])">
+                            <span class="tb-ws-palette-icon"/><t t-esc="item[1]"/>
+                        </div>
+                    </t>
+                    <h4>其他节点</h4>
+                    <div class="tb-ws-palette-item" data-kind="subflow"
+                         t-on-mousedown="(ev) => this.dragStart(ev, 'subflow', '子流程')" t-on-click="() => this.addNode('subflow', '子流程')">
+                        <span class="tb-ws-palette-icon"/>子流程
+                    </div>
+                </aside>
+                <main class="tb-ws-canvas-wrap">
+                    <div class="tb-ws-canvas" t-ref="this.canvasRef"/>
+                    <div class="tb-ws-help">从节点锚点拖出连线 · 拖动节点调整布局 · 选中后按 Delete 删除</div>
+                </main>
+                <aside class="tb-ws-inspector">
+                    <h3>节点属性</h3>
+                    <t t-if="this.state.selected">
+                        <div class="tb-ws-section">
+                            <small t-esc="this.state.selected.kind === 'node' ? '节点' : '连线'"/>
+                            <label>名称<input type="text" t-att-value="this.state.selected.name" t-on-input="(ev) => this.changeName(ev)"/></label>
+                            <label>ID<input type="text" t-att-value="this.state.selected.id" readonly="1"/></label>
+                        </div>
+                        <t t-if="this.state.selected.kind === 'node'">
+                            <div class="tb-ws-section" t-if="this.state.selected.properties.node_type === 'approval'">
+                                <h4>审批人设置</h4>
+                                <div class="tb-ws-source-grid">
+                                    <button t-foreach="[['users','指定用户','fa-user'],['group','用户组','fa-users'],['manager','直属上级','fa-level-up'],['department','部门主管','fa-sitemap'],['expression','动态表达式','fa-code'],['amount','金额分级','fa-money']]"
+                                            t-as="source" t-key="source[0]" type="button"
+                                            t-att-class="this.state.selected.properties.approver_source === source[0] ? 'is-active' : ''"
+                                            t-on-click="() => this.setApproverSource(source[0])">
+                                        <i t-att-class="'fa ' + source[2]"/><t t-esc="source[1]"/>
+                                    </button>
+                                </div>
+                                <label>审批模式
+                                    <select t-att-value="this.state.selected.properties.approve_mode || 'or'" t-on-change="(ev) => this.changeProperty('approve_mode', ev)">
+                                        <option value="or">或签（一人通过）</option><option value="and">会签（全部通过）</option>
+                                    </select>
+                                </label>
+                                <label class="tb-ws-check"><input type="checkbox" t-att-checked="this.state.selected.properties.auto_pass_no_approver !== false" t-on-change="(ev) => this.changeProperty('auto_pass_no_approver', ev)"/>无审批人时自动通过</label>
+                                <div t-if="this.state.selected.properties.approver_source === 'users'">
+                                    <label>指定用户</label>
+                                    <div class="tb-ws-chips">
+                                        <span t-foreach="this.state.selected.properties.approver_user_ids || []" t-as="u" t-key="u.id || u">
+                                            <t t-esc="u.name || u"/><i class="fa fa-times" t-on-click="() => this.removeUser(u.id || u, 'approver_user_ids')"/>
+                                        </span>
+                                    </div>
+                                    <input type="text" placeholder="搜索审批人" t-att-value="this.state.userQuery" t-on-input="(ev) => this.searchUsers(ev)"/>
+                                    <div class="tb-ws-results" t-if="this.state.users.length">
+                                        <div t-foreach="this.state.users" t-as="u" t-key="u.id" t-on-click="() => this.addUser(u, 'approver_user_ids')" t-esc="u.name"/>
+                                    </div>
+                                </div>
+                                <div t-elif="this.state.selected.properties.approver_source === 'group'">
+                                    <label>用户组</label>
+                                    <div class="tb-ws-chips" t-if="this.state.selected.properties.approver_group_name">
+                                        <span t-esc="this.state.selected.properties.approver_group_name"/>
+                                    </div>
+                                    <input type="text" placeholder="搜索用户组" t-att-value="this.state.groupQuery" t-on-input="(ev) => this.searchGroups(ev)"/>
+                                    <div class="tb-ws-results" t-if="this.state.groups.length">
+                                        <div t-foreach="this.state.groups" t-as="g" t-key="g.id" t-on-click="() => this.chooseGroup(g)" t-esc="g.name"/>
+                                    </div>
+                                </div>
+                                <p class="tb-ws-source-hint" t-if="this.state.selected.properties.approver_source === 'manager'">使用发起人的员工档案中设置的直属上级。</p>
+                                <p class="tb-ws-source-hint" t-if="this.state.selected.properties.approver_source === 'department'">使用发起人所在部门的主管。</p>
+                                <div t-if="this.state.selected.properties.approver_source === 'expression'">
+                                    <label>审批人表达式</label>
+                                    <textarea placeholder="object.user_id" t-att-value="this.state.selected.properties.approver_expression || ''"
+                                              t-on-input="(ev) => this.changeProperty('approver_expression', ev)"/>
+                                    <p class="tb-ws-source-hint">可使用 object（当前单据）和 initiator（发起人）；返回用户记录或用户 ID 列表。</p>
+                                </div>
+                                <div t-if="this.state.selected.properties.approver_source === 'amount'">
+                                    <label>金额字段<input type="text" placeholder="amount_total" t-att-value="this.state.selected.properties.amount_field || ''"
+                                                      t-on-input="(ev) => this.changeProperty('amount_field', ev)"/></label>
+                                    <p class="tb-ws-source-hint">按金额选择满足门槛的最高一级。</p>
+                                    <div class="tb-ws-tier" t-foreach="this.state.selected.properties.amount_tiers || []" t-as="tier" t-key="tier_index">
+                                        <button type="button" class="tb-ws-tier-remove" t-on-click="() => this.removeTier(tier_index)">×</button>
+                                        <label>起始金额<input type="number" t-att-value="tier.min_amount" t-on-input="(ev) => this.setTierMin(tier_index, ev)"/></label>
+                                        <label>审批人</label>
+                                        <div class="tb-ws-chips"><span t-foreach="tier.users || []" t-as="u" t-key="u.id || u"><t t-esc="u.name || u"/><i class="fa fa-times" t-on-click="() => this.removeTierUser(tier_index, u.id || u)"/></span></div>
+                                        <input type="text" placeholder="搜索审批人" t-att-value="this.state.activeTier === tier_index ? this.state.userQuery : ''" t-on-input="(ev) => this.searchTierUsers(ev, tier_index)"/>
+                                        <div class="tb-ws-results" t-if="this.state.activeTier === tier_index &amp;&amp; this.state.users.length"><div t-foreach="this.state.users" t-as="u" t-key="u.id" t-on-click="() => this.addTierUser(tier_index, u)" t-esc="u.name"/></div>
+                                    </div>
+                                    <button type="button" class="tb-ws-add-tier" t-on-click="() => this.addTier()">＋ 添加金额级别</button>
+                                </div>
+                            </div>
+                            <div class="tb-ws-section" t-if="this.state.selected.properties.node_type === 'cc'">
+                                <h4>抄送人</h4>
+                                <div class="tb-ws-chips"><span t-foreach="this.state.selected.properties.cc_user_ids || []" t-as="u" t-key="u.id || u"><t t-esc="u.name || u"/><i class="fa fa-times" t-on-click="() => this.removeUser(u.id || u, 'cc_user_ids')"/></span></div>
+                                <input type="text" placeholder="搜索抄送人" t-att-value="this.state.userQuery" t-on-input="(ev) => this.searchUsers(ev)"/>
+                                <div class="tb-ws-results" t-if="this.state.users.length"><div t-foreach="this.state.users" t-as="u" t-key="u.id" t-on-click="() => this.addUser(u, 'cc_user_ids')" t-esc="u.name"/></div>
+                            </div>
+                            <div class="tb-ws-section" t-if="this.state.selected.properties.node_type === 'service'">
+                                <h4>服务任务设置</h4>
+                                <label>单据方法<input type="text" placeholder="button_confirm" t-att-value="this.state.selected.properties.service_method || ''"
+                                                 t-on-input="(ev) => this.changeProperty('service_method', ev)"/></label>
+                                <p class="tb-ws-source-hint">到达此节点时调用当前单据上配置的无参方法，然后继续流转。</p>
+                            </div>
+                            <div class="tb-ws-section" t-if="this.state.selected.properties.node_type === 'subflow'">
+                                <h4>子流程设置</h4>
+                                <label>审批流程
+                                    <select t-att-value="this.state.selected.properties.sub_flow_id || ''" t-on-change="(ev) => this.setSubFlow(ev)">
+                                        <option value="">请选择子流程</option>
+                                        <option t-foreach="this.state.subFlows" t-as="flow" t-key="flow.id" t-att-value="flow.id">
+                                            <t t-esc="flow.name"/> · <t t-esc="flow.version_label"/>
+                                        </option>
+                                    </select>
+                                </label>
+                                <p class="tb-ws-source-hint">子流程通过后，当前流程继续流转；驳回时结束当前流程。</p>
+                            </div>
+                        </t>
+                        <div class="tb-ws-section" t-else="">
+                            <h4>流转条件</h4>
+                            <label>Python 表达式<input type="text" placeholder="object.amount_total &gt; 50000" t-att-value="this.state.selected.properties.condition || ''" t-on-input="(ev) => this.changeProperty('condition', ev)"/></label>
+                            <label class="tb-ws-check"><input type="checkbox" t-att-checked="!!this.state.selected.properties.is_default" t-on-change="(ev) => this.changeProperty('is_default', ev)"/>默认分支</label>
+                        </div>
+                        <button type="button" class="tb-ws-remove" t-on-click="() => this.removeSelected()"><i class="fa fa-trash"/> 删除</button>
+                    </t>
+                    <p class="tb-ws-empty" t-else="">选择节点或连线，编辑属性</p>
+                </aside>
+            </div>
+        </div>
+    </t>
+    <t t-name="tb_approval.FlowPreviewField">
+        <div class="tb-flow-preview">
+            <svg t-if="this.hasDesign" class="tb-flow-preview-svg"
+                 t-att-viewBox="this.layout.viewBox"
+                 t-att-style="'width:min(100%,' + this.layout.width + 'px);height:min(100%,' + this.layout.height + 'px)'"
+                 preserveAspectRatio="xMidYMid meet" role="img" aria-label="审批流程图">
+                <defs>
+                    <marker id="tb-flow-preview-arrow" markerWidth="10" markerHeight="10"
+                            refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+                        <path d="M0 0 L10 5 L0 10 Z" fill="#74818b"/>
+                    </marker>
+                    <marker id="tb-flow-preview-arrow-running" markerWidth="10" markerHeight="10"
+                            refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+                        <path d="M0 0 L10 5 L0 10 Z" fill="#2879b8"/>
+                    </marker>
+                    <marker id="tb-flow-preview-arrow-approved" markerWidth="10" markerHeight="10"
+                            refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+                        <path d="M0 0 L10 5 L0 10 Z" fill="#2c9a70"/>
+                    </marker>
+                    <marker id="tb-flow-preview-arrow-rejected" markerWidth="10" markerHeight="10"
+                            refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+                        <path d="M0 0 L10 5 L0 10 Z" fill="#c75b55"/>
+                    </marker>
+                </defs>
+                <g t-foreach="this.layout.edges" t-as="edge" t-key="edge.id"
+                   t-att-class="'tb-flow-preview-edge is-' + edge.state">
+                     <polyline t-att-points="edge.points" fill="none" stroke="#74818b" stroke-width="1.8"
+                               t-att-marker-end="'url(#tb-flow-preview-arrow' + (edge.state === 'pending' ? '' : '-' + edge.state) + ')'"/>
+                    <text t-if="edge.name" t-att-x="edge.label.x" t-att-y="edge.label.y"
+                          class="tb-flow-preview-edge-label" text-anchor="middle" t-esc="edge.name"/>
+                </g>
+                <g t-foreach="this.layout.nodes" t-as="node" t-key="node.id"
+                   t-att-class="'tb-flow-preview-node' + (node.state ? ' is-' + node.state : '')">
+                    <t t-if="node.node_type === 'start'">
+                        <circle t-att-cx="node.x" t-att-cy="node.y" r="24" fill="#eaf1ff" stroke="#526a9d" stroke-width="2"/>
+                        <text t-att-x="node.x" t-att-y="node.y + 4" text-anchor="middle" class="tb-flow-preview-start" t-esc="node.name"/>
+                    </t>
+                    <t t-elif="node.node_type === 'end'">
+                        <circle t-att-cx="node.x" t-att-cy="node.y" r="27" fill="#daf5e9" stroke="#4b9b7a" stroke-width="2"/>
+                        <circle t-att-cx="node.x" t-att-cy="node.y" r="22" fill="none" stroke="#4b9b7a" stroke-width="2" class="tb-flow-preview-end-inner"/>
+                        <text t-att-x="node.x" t-att-y="node.y + 4" text-anchor="middle" class="tb-flow-preview-end" t-esc="node.name"/>
+                    </t>
+                    <t t-elif="['exclusive','exclusive_join','parallel_split','parallel_join'].includes(node.node_type)">
+                        <polygon t-att-points="node.x + ',' + (node.y - 34) + ' ' + (node.x + 34) + ',' + node.y + ' ' + node.x + ',' + (node.y + 34) + ' ' + (node.x - 34) + ',' + node.y"
+                                 fill="#eefaf5" stroke="#57a78a" stroke-width="2"/>
+                        <text t-att-x="node.x" t-att-y="node.y + 4" text-anchor="middle" class="tb-flow-preview-gateway" t-esc="node.name"/>
+                    </t>
+                    <t t-else="">
+                        <rect t-att-x="node.x - 95" t-att-y="node.y - 33" width="190" height="66" rx="4"
+                              fill="#fff" stroke="#d0d9e1"/>
+                        <path t-att-d="'M' + (node.x - 91) + ',' + (node.y - 33) + ' h182 a4,4 0 0 1 4,4 v18 h-190 v-18 a4,4 0 0 1 4,-4'"
+                              t-att-fill="node.node_type === 'cc' ? '#9a78b9' : node.node_type === 'service' ? '#8576b4' : node.node_type === 'subflow' ? '#67a6c8' : '#ed873e'"/>
+                        <text t-att-x="node.x - 84" t-att-y="node.y - 17" class="tb-flow-preview-head"
+                              t-esc="node.node_type === 'cc' ? '抄送' : node.node_type === 'service' ? '服务任务' : node.node_type === 'subflow' ? '子流程' : '人工审批'"/>
+                        <text t-att-x="node.x - 84" t-att-y="node.y + 13" class="tb-flow-preview-name" t-esc="node.name"/>
+                    </t>
+                </g>
+            </svg>
+            <div t-else="" class="tb-flow-preview-empty">尚未设计流程图</div>
+        </div>
+    </t>
+</templates>
